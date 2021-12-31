@@ -305,7 +305,7 @@ type multiPolyOut struct {
 	polys     []*polyOut
 }
 
-func NewMultiPolyOut(rings []*ringOut) multiPolyOut {
+func newMultiPolyOut(rings []*ringOut) multiPolyOut {
 	mpo := multiPolyOut{}
 	mpo.rings = rings
 	mpo.polys = mpo.composePolys(rings)

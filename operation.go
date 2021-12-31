@@ -142,7 +142,7 @@ func (op *operation) run(optype string, geom Geom, moreGeoms ...Geom) (Geom, err
 		return nil, err
 	}
 
-	result := NewMultiPolyOut(ringsOut)
+	result := newMultiPolyOut(ringsOut)
 
 	return result.getGeom(), nil
 }

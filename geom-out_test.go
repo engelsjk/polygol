@@ -639,7 +639,7 @@ func TestGeomOutPolyColinearInteriorRing(t *testing.T) {
 func TestGeomOutMultiPolyBasic(t *testing.T) {
 	// basic
 
-	multiPoly := NewMultiPolyOut([]*ringOut{})
+	multiPoly := newMultiPolyOut([]*ringOut{})
 	poly1 := &polyOut{
 		forceGeom: true,
 		geom:      [][][]float64{{{0}}},
@@ -656,7 +656,7 @@ func TestGeomOutMultiPolyBasic(t *testing.T) {
 func TestGeomOutMultiPolyColinearExteriorRing(t *testing.T) {
 	// has poly with all colinear exterior ring
 
-	multiPoly := NewMultiPolyOut([]*ringOut{})
+	multiPoly := newMultiPolyOut([]*ringOut{})
 	poly1 := &polyOut{
 		forceGeom: true,
 		geom:      nil,
