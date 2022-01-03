@@ -1,6 +1,6 @@
 # Examples
 
-Both the input and output of ```polygol``` operations use a simple type Geom which represents the coordinate structure of a MultiPolygon:
+Both the input and output of ```polygol``` operations use a simple type ```Geom``` which represents the coordinate structure of a MultiPolygon:
 
 ```go
 type Geom [][][][]float64
@@ -73,7 +73,7 @@ Note: The GeoJSON unmarshalling in the example above assumes the use of either [
 
 ## Conversion Functions
 
-The conversion functions shown here are for illustrative purposes only, your mileage may vary.
+The conversion functions shown here are for illustrative purposes only, there are probably much more efficient ways of doing these. Your mileage may vary.
 
 ### paulmach/go.geojson
 
