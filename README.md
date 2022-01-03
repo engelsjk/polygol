@@ -35,7 +35,7 @@ func polygol.Union(geom polygol.Geom, moreGeoms ...polygol.Geom) (polygol.Geom, 
 
 The [examples](https://github.com/engelsjk/polygol/tree/main/examples) page includes some information on how ```polygol``` can interface with Go geometry libraries like [paulmach/go.geojson](https://github.com/paulmach/go.geojson), [paulmach/orb](https://github.com/paulmach/orb) and [twpayne/go-geom](https://github.com/twpayne/go-geom).
 
-## Test Coverage
+## Test coverage
 
 At the moment, ```polygol``` aims to have 100% test coverage relative to [polygon-clipping](https://github.com/mfogel/polygon-clipping); all unit and end-to-end tests have been ported over to Go.
 
@@ -59,8 +59,27 @@ The Martínez-Rueda-Feito polygon clipping algorithm computes the Boolean operat
 
 The algorithm implemented here and in [polygon-clipping](https://github.com/mfogel/polygon-clipping) is based on the following paper:
 
-[*A new algorithm for computing Boolean operations on polygons*](https://github.com/mfogel/polygon-clipping/blob/master/paper.pdf) by Francisco Martínez, Antonio Jesus Rueda, Francisco Ramon Feito (2009)
+[*A new algorithm for computing Boolean operations on polygons*](https://github.com/mfogel/polygon-clipping/blob/master/paper.pdf) by Francisco Martínez, Antonio J. Rueda, Francisco R. Feito (2009)
 
 Additional information can also be found in the follow-up paper:
 
 [*A simple algorithm for Boolean operations on polygons*](https://www.sciencedirect.com/science/article/abs/pii/S0965997813000379) by Francisco Martínez, Carlos Ogayar, Juan R. Jiménez and Antonio J. Rueda (2013)
+
+## Implementation survey of the Martínez-Rueda-Feito algorithm
+
+| Language | URL | Notes |
+| -- | ---------------------------------------------------------------| - |
+| C++ | [fmartin/bool_op](http://www4.ujaen.es/~fmartin/bool_op.html) | original implementation |
+| JavaScript | [mfogel/polygon-clipping](https://github.com/mfogel/polygon-clipping) | notably used [here](https://github.com/Turfjs/turf) and [here](https://github.com/openstreetmap/iD) |
+| JavaScript | [w8r/martinez](https://github.com/w8r/martinez) | an extension of the original algorithm |
+| JavaScript | [mapbox/polyclip](https://github.com/mapbox/polyclip) | by [mourner](https://github.com/mourner)! archived though |
+| JavaScript | [velipso/polybooljs](https://github.com/velipso/polybooljs) | "based somewhat" on the original |
+| Go | [engelsjk/polygol](https://github.com/engelsjk/polygol) | this one, a port of [mfogel/polygon-clipping](https://github.com/mfogel/polygon-clipping) |
+| Go | [toanqng/martinez-rueda](https://github.com/toanqng/martinez-rueda) | based on [kudm761/martinez-rueda-php](https://github.com/kudm761/martinez-rueda-php) |
+| Go | [akavel/polyclip-go](https://github.com/akavel/polyclip-go) | "known to have bugs" |
+| Rust | [21re/rust-geo-booleanop](https://github.com/21re/rust-geo-booleanop) | closely follows [w8r/martinez](https://github.com/w8r/martinez) |
+| Python | [lycantropos/martinez](https://github.com/lycantropos/martinez) | port of the original |
+| Python | [lycantropos/clipping](https://github.com/lycantropos/clipping) | |
+| PHP | [kudm761/martinez-rueda-php](https://github.com/kudm761/martinez-rueda-php) | based on the original |
+| C/ActionScript3 | [akavel/martinez-src](https://github.com/akavel/martinez-src) | copy of the original with an AS3 port |
+| Scala | [JonMcPherson/martinez-polygon-clipper](https://github.com/JonMcPherson/martinez-polygon-clipper) | ported from [w8r/martinez](https://github.com/w8r/martinez) |
