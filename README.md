@@ -70,8 +70,8 @@ Additional information can also be found in the follow-up paper:
 | Language | URL | Notes |
 | -- | ---------------------------------------------------------------| - |
 | C++ | [fmartin/bool_op](http://www4.ujaen.es/~fmartin/bool_op.html) | original implementation |
-| JavaScript | [mfogel/polygon-clipping](https://github.com/mfogel/polygon-clipping) | notably used [here](https://github.com/Turfjs/turf) and [here](https://github.com/openstreetmap/iD) |
 | JavaScript | [w8r/martinez](https://github.com/w8r/martinez) | an extension of the original algorithm |
+| JavaScript | [mfogel/polygon-clipping](https://github.com/mfogel/polygon-clipping) | originally forked from [w8r/martinez](https://github.com/w8r/martinez), notably used [here](https://github.com/Turfjs/turf) and [here](https://github.com/openstreetmap/iD) |
 | JavaScript | [mapbox/polyclip](https://github.com/mapbox/polyclip) | by [mourner](https://github.com/mourner)! archived though |
 | JavaScript | [velipso/polybooljs](https://github.com/velipso/polybooljs) | "based somewhat" on the original |
 | Go | [engelsjk/polygol](https://github.com/engelsjk/polygol) | this one, a port of [mfogel/polygon-clipping](https://github.com/mfogel/polygon-clipping) |
