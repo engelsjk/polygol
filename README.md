@@ -45,7 +45,11 @@ At the moment, ```polygol``` aims to have 100% test coverage relative to [polygo
 
 ## Why ```polygon-clipping```?
 
-The [polygon-clipping](https://github.com/mfogel/polygon-clipping) library is a well-tested implementation of the Martínez-Rueda-Feito algorithm and is also currently used behind-the-scenes in both TurfJS and the OpenStreetMap iD editor. Naively porting this library to Go is intended to provide a simple but robust polygon clipping capability in Go without the need for [GEOS](https://trac.osgeo.org/geos) bindings. Future improvements to ```polygol``` may include algorithm restructuring, better memory management and built-in interfaces to common Go geometry libraries.
+The [polygon-clipping](https://github.com/mfogel/polygon-clipping) library is a well-tested implementation of the Martínez-Rueda-Feito algorithm and is also currently used behind-the-scenes in both TurfJS and the OpenStreetMap iD editor. Naively porting this library to Go is intended to provide a simple but robust polygon clipping capability in Go without the need for [GEOS](https://trac.osgeo.org/geos) bindings.
+
+## Improvements
+
+The first improvement to ```polygol``` will likely be a slight restructuring to make the library concurrency-safe. Future improvements may also include algorithm restructuring, better memory management and built-in interfaces to common Go geometry libraries.
 
 ## Performance
 
