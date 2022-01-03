@@ -19,13 +19,13 @@ xor, _ := polygol.XOR(A, B, C)
 
 ## API
 
-```polygol``` only has a single type ```Geom``` that represents a MultiPolygon:
+```polygol``` only has a single type ```Geom``` which represents the coordinate structure of a MultiPolygon:
 
 ```go
 type Geom [][][][]float64
 ```
 
-Each of the Boolean operations (union, intersection, difference and XOR) take in one subject ```Geom``` with any number of clipping ```Geom```'s and then returns a single result ```Geom```:
+Each Boolean operation (union, intersection, difference and XOR) takes in one subject ```Geom``` with any number of clipping ```Geom```'s and then returns a single result ```Geom```:
 
 ```go
 func polygol.Union(geom polygol.Geom, moreGeoms ...polygol.Geom) (polygol.Geom, error)
