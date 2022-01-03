@@ -25,7 +25,7 @@ xor, _ := polygol.XOR(A, B, C)
 type Geom [][][][]float64
 ```
 
-Each of the Boolean operations (union, intersection, difference and XOR) take in one subject ```Geom``` and any number of clipping ```Geom```'s:
+Each of the Boolean operations (union, intersection, difference and XOR) take in one subject ```Geom``` with any number of clipping ```Geom```'s and then returns a single result ```Geom```:
 
 ```go
 func polygol.Union(geom polygol.Geom, moreGeoms ...polygol.Geom) (polygol.Geom, error)
