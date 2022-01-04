@@ -44,12 +44,14 @@ func TestnewSegment(t *testing.T) {
 
 	var leftSE, rightSE *sweepEvent
 
+	op := newOperation("")
+
 	// general
 	leftSE = newSweepEvent(newPoint(0, 0), true)
 	rightSE = newSweepEvent(newPoint(1, 1), false)
 	rings := []*ringIn{}
 	windings := []int{}
-	seg := newSegment(leftSE, rightSE, rings, windings)
+	seg := op.newSegment(leftSE, rightSE, rings, windings)
 
 	expect(t, equalRingIn(seg.rings, rings))
 	expect(t, equalWinding(seg.windings, windings))
@@ -64,8 +66,8 @@ func TestnewSegment(t *testing.T) {
 	// segment Id increments
 	leftSE = newSweepEvent(&point{x: 0, y: 0}, true)
 	rightSE = newSweepEvent(&point{x: 1, y: 1}, false)
-	seg1 := newSegment(leftSE, rightSE, []*ringIn{}, nil)
-	seg2 := newSegment(leftSE, rightSE, []*ringIn{}, nil)
+	seg1 := op.newSegment(leftSE, rightSE, []*ringIn{}, nil)
+	seg2 := op.newSegment(leftSE, rightSE, []*ringIn{}, nil)
 	expect(t, seg2.id-seg1.id == 1)
 }
 
@@ -74,9 +76,11 @@ func TestnewSegmentFromRing(t *testing.T) {
 	var seg *segment
 	var err error
 
+	op := newOperation("")
+
 	// correct point on left and right 1
 	p1, p2 = &point{x: 0, y: 0}, &point{x: 0, y: 1}
-	seg, err = newSegmentFromRing(p1, p2, &ringIn{})
+	seg, err = op.newSegmentFromRing(p1, p2, &ringIn{})
 	terr(t, err)
 
 	expect(t, seg.leftSE.point.equal(*p1))
@@ -84,7 +88,7 @@ func TestnewSegmentFromRing(t *testing.T) {
 
 	// correct point on left and right 1
 	p1, p2 = &point{x: 0, y: 0}, &point{x: -1, y: 0}
-	seg, err = newSegmentFromRing(p1, p2, nil)
+	seg, err = op.newSegmentFromRing(p1, p2, nil)
 	terr(t, err)
 
 	expect(t, seg.leftSE.point.equal(*p2))
@@ -92,7 +96,7 @@ func TestnewSegmentFromRing(t *testing.T) {
 
 	// attempt create segment with same points
 	p1, p2 = &point{x: 0, y: 0}, &point{x: 0, y: 0}
-	seg, err = newSegmentFromRing(p1, p2, nil)
+	seg, err = op.newSegmentFromRing(p1, p2, nil)
 	expect(t, err != nil)
 }
 
@@ -103,8 +107,10 @@ func TestSegmentSplit(t *testing.T) {
 	var evts []*sweepEvent
 	var err error
 
+	op := newOperation("")
+
 	// on interior point
-	seg, err = newSegmentFromRing(newPoint(0, 0), newPoint(10, 10), nil)
+	seg, err = op.newSegmentFromRing(newPoint(0, 0), newPoint(10, 10), nil)
 	terr(t, err)
 
 	pt = &point{x: 5, y: 5}
@@ -121,7 +127,7 @@ func TestSegmentSplit(t *testing.T) {
 	expect(t, evts[1].segment.rightSE.segment == evts[1].segment)
 
 	// on close-to-but-not-exactly interior point
-	seg, err = newSegmentFromRing(&point{x: 0, y: 10}, &point{x: 10, y: 0}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 0, y: 10}, &point{x: 10, y: 0}, nil)
 	terr(t, err)
 
 	pt = &point{x: 5 + epsilon, y: 5}
@@ -135,7 +141,7 @@ func TestSegmentSplit(t *testing.T) {
 	expect(t, evts[1].segment.rightSE.segment == evts[1].segment)
 
 	// on three interior points
-	seg, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 10, y: 0}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 10, y: 0}, nil)
 	terr(t, err)
 
 	sPt1, sPt2, sPt3 := &point{x: 2, y: 2}, &point{x: 4, y: 4}, &point{x: 6, y: 6}
@@ -197,22 +203,24 @@ func TestSegmentSimplePropertiesBboxVector(t *testing.T) {
 	var seg *segment
 	var err error
 
+	op := newOperation("")
+
 	// general
-	seg, err = newSegmentFromRing(&point{x: 1, y: 2}, &point{x: 3, y: 4}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 2}, &point{x: 3, y: 4}, nil)
 	terr(t, err)
 
 	expect(t, equalBbox(seg.bbox(), bbox{ll: point{x: 1, y: 2}, ur: point{x: 3, y: 4}}))
 	expect(t, equalVector(seg.vector(), []float64{2, 2}))
 
 	// horizontal
-	seg, err = newSegmentFromRing(&point{x: 1, y: 4}, &point{x: 3, y: 4}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 4}, &point{x: 3, y: 4}, nil)
 	terr(t, err)
 
 	expect(t, equalBbox(seg.bbox(), bbox{ll: point{x: 1, y: 4}, ur: point{x: 3, y: 4}}))
 	expect(t, equalVector(seg.vector(), []float64{2, 0}))
 
 	// vertical
-	seg, err = newSegmentFromRing(&point{x: 3, y: 2}, &point{x: 3, y: 4}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 3, y: 2}, &point{x: 3, y: 4}, nil)
 	terr(t, err)
 
 	expect(t, equalBbox(seg.bbox(), bbox{ll: point{x: 3, y: 2}, ur: point{x: 3, y: 4}}))
@@ -223,12 +231,14 @@ func TestSegmentConsume(t *testing.T) {
 	var seg1, seg2 *segment
 	var err error
 
+	op := newOperation("")
+
 	// not automatically consumed
 	p1, p2 = &point{x: 0, y: 0}, &point{x: 1, y: 0}
-	seg1, err = newSegmentFromRing(p1, p2, nil)
+	seg1, err = op.newSegmentFromRing(p1, p2, nil)
 	terr(t, err)
 
-	seg2, err = newSegmentFromRing(p1, p2, nil)
+	seg2, err = op.newSegmentFromRing(p1, p2, nil)
 	terr(t, err)
 
 	expect(t, seg1.consumedBy == nil)
@@ -236,10 +246,10 @@ func TestSegmentConsume(t *testing.T) {
 
 	// basic case
 	p1, p2 = &point{x: 0, y: 0}, &point{x: 1, y: 0}
-	seg1, err = newSegmentFromRing(p1, p2, nil)
+	seg1, err = op.newSegmentFromRing(p1, p2, nil)
 	terr(t, err)
 
-	seg2, err = newSegmentFromRing(p1, p2, nil)
+	seg2, err = op.newSegmentFromRing(p1, p2, nil)
 	terr(t, err)
 
 	seg1.consume(seg2)
@@ -248,10 +258,10 @@ func TestSegmentConsume(t *testing.T) {
 
 	// earlier in sweep line  sorting consumes later
 	p1, p2 = &point{x: 0, y: 0}, &point{x: 1, y: 0}
-	seg1, err = newSegmentFromRing(p1, p2, nil)
+	seg1, err = op.newSegmentFromRing(p1, p2, nil)
 	terr(t, err)
 
-	seg2, err = newSegmentFromRing(p1, p2, nil)
+	seg2, err = op.newSegmentFromRing(p1, p2, nil)
 	terr(t, err)
 
 	seg2.consume(seg1)
@@ -261,19 +271,19 @@ func TestSegmentConsume(t *testing.T) {
 	// consuming cascades
 	p1, p2 = &point{x: 0, y: 0}, &point{x: 0, y: 0}
 	p3, p4 := &point{x: 1, y: 0}, &point{x: 1, y: 0}
-	seg1, err = newSegmentFromRing(p1, p3, nil)
+	seg1, err = op.newSegmentFromRing(p1, p3, nil)
 	terr(t, err)
 
-	seg2, err = newSegmentFromRing(p1, p3, nil)
+	seg2, err = op.newSegmentFromRing(p1, p3, nil)
 	terr(t, err)
 
-	seg3, err := newSegmentFromRing(p2, p4, nil)
+	seg3, err := op.newSegmentFromRing(p2, p4, nil)
 	terr(t, err)
 
-	seg4, err := newSegmentFromRing(p2, p4, nil)
+	seg4, err := op.newSegmentFromRing(p2, p4, nil)
 	terr(t, err)
 
-	seg5, err := newSegmentFromRing(p2, p4, nil)
+	seg5, err := op.newSegmentFromRing(p2, p4, nil)
 	terr(t, err)
 
 	seg1.consume(seg2)
@@ -287,8 +297,11 @@ func TestSegmentConsume(t *testing.T) {
 	expect(t, seg5.consumedBy == seg1)
 }
 func TestSegmentIsAnEndpoint(t *testing.T) {
+
+	op := newOperation("")
+
 	p1, p2 := &point{x: 0, y: -1}, &point{x: 1, y: 0}
-	seg, err := newSegmentFromRing(p1, p2, nil)
+	seg, err := op.newSegmentFromRing(p1, p2, nil)
 	terr(t, err)
 
 	// yup
@@ -304,10 +317,12 @@ func TestSegmentComparisonWithPoint(t *testing.T) {
 	var err error
 	var pt *point
 
-	seg1, err := newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	op := newOperation("")
+
+	seg1, err := op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
 
-	seg2, err := newSegmentFromRing(&point{x: 0, y: 1}, &point{x: 0, y: 0}, nil)
+	seg2, err := op.newSegmentFromRing(&point{x: 0, y: 1}, &point{x: 0, y: 0}, nil)
 	terr(t, err)
 
 	expect(t, seg1.comparePoint(&point{x: 0, y: 1}) == 1)
@@ -321,133 +336,133 @@ func TestSegmentComparisonWithPoint(t *testing.T) {
 	expect(t, seg2.comparePoint(&point{x: 5, y: -1}) == -1)
 
 	// barely above
-	seg, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
 	terr(t, err)
 
 	pt = &point{x: 2, y: 1 + epsilon*3/2}
 	expect(t, seg.comparePoint(pt) == 1)
 
 	// vertical before
-	seg, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 1, y: 3}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 1, y: 3}, nil)
 	terr(t, err)
 
 	pt = &point{x: 0, y: 0}
 	expect(t, seg.comparePoint(pt) == 1)
 
 	// vertical after
-	seg, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 1, y: 3}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 1, y: 3}, nil)
 	terr(t, err)
 
 	pt = &point{x: 2, y: 0}
 	expect(t, seg.comparePoint(pt) == -1)
 
 	// vertical on
-	seg, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 1, y: 3}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 1, y: 3}, nil)
 	terr(t, err)
 
 	pt = &point{x: 1, y: 0}
 	expect(t, seg.comparePoint(pt) == 0)
 
 	// horizontal below
-	seg, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
 	terr(t, err)
 
 	pt = &point{x: 0, y: 0}
 	expect(t, seg.comparePoint(pt) == -1)
 
 	// horizontal above
-	seg, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
 	terr(t, err)
 
 	pt = &point{x: 0, y: 2}
 	expect(t, seg.comparePoint(pt) == 1)
 
 	// horizontal on
-	seg, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
 	terr(t, err)
 
 	pt = &point{x: 0, y: 1}
 	expect(t, seg.comparePoint(pt) == 0)
 
 	// in vertical plane below
-	seg, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
 	terr(t, err)
 
 	pt = &point{x: 2, y: 0}
 	expect(t, seg.comparePoint(pt) == -1)
 
 	// in vertical plane above
-	seg, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
 	terr(t, err)
 
 	pt = &point{x: 2, y: 4}
 	expect(t, seg.comparePoint(pt) == 1)
 
 	// in horizontal plane upward sloping before
-	seg, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
 	terr(t, err)
 
 	pt = &point{x: 0, y: 2}
 	expect(t, seg.comparePoint(pt) == 1)
 
 	// in horizontal plane upward sloping after
-	seg, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
 	terr(t, err)
 
 	pt = &point{x: 4, y: 2}
 	expect(t, seg.comparePoint(pt) == -1)
 
 	// in horizontal plane downward sloping below
-	seg, err = newSegmentFromRing(&point{x: 1, y: 3}, &point{x: 3, y: 1}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 3}, &point{x: 3, y: 1}, nil)
 	terr(t, err)
 
 	pt = &point{x: 0, y: 2}
 	expect(t, seg.comparePoint(pt) == -1)
 
 	// in horizontal plane downward sloping after
-	seg, err = newSegmentFromRing(&point{x: 1, y: 3}, &point{x: 3, y: 1}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 3}, &point{x: 3, y: 1}, nil)
 	terr(t, err)
 
 	pt = &point{x: 4, y: 2}
 	expect(t, seg.comparePoint(pt) == 1)
 
 	// upward more vertical before
-	seg, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 6}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 6}, nil)
 	terr(t, err)
 
 	pt = &point{x: 0, y: 2}
 	expect(t, seg.comparePoint(pt) == 1)
 
 	// upward more vertical after
-	seg, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 6}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 6}, nil)
 	terr(t, err)
 
 	pt = &point{x: 4, y: 2}
 	expect(t, seg.comparePoint(pt) == -1)
 
 	// downward more vertical before
-	seg, err = newSegmentFromRing(&point{x: 1, y: 6}, &point{x: 3, y: 1}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 6}, &point{x: 3, y: 1}, nil)
 	terr(t, err)
 
 	pt = &point{x: 0, y: 2}
 	expect(t, seg.comparePoint(pt) == -1)
 
 	// downward more vertical after
-	seg, err = newSegmentFromRing(&point{x: 1, y: 6}, &point{x: 3, y: 1}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 1, y: 6}, &point{x: 3, y: 1}, nil)
 	terr(t, err)
 
 	pt = &point{x: 4, y: 2}
 	expect(t, seg.comparePoint(pt) == 1)
 
 	// downward-slopping segment with almost touching point - from issue 37
-	seg, err = newSegmentFromRing(&point{x: 0.523985, y: 51.281651}, &point{x: 0.5241, y: 51.281651000100005}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: 0.523985, y: 51.281651}, &point{x: 0.5241, y: 51.281651000100005}, nil)
 	terr(t, err)
 
 	pt = &point{x: 0.5239850000000027, y: 51.281651000000004}
 	expect(t, seg.comparePoint(pt) == 1)
 
 	// avoid splitting loops on near vertical segments - from issue 60-2
-	seg, err = newSegmentFromRing(&point{x: -45.3269382, y: -1.4059341}, &point{x: -45.326737413921656, y: -1.40635}, nil)
+	seg, err = op.newSegmentFromRing(&point{x: -45.3269382, y: -1.4059341}, &point{x: -45.326737413921656, y: -1.40635}, nil)
 	terr(t, err)
 
 	pt = &point{x: -45.326833968900424, y: -1.40615}
@@ -458,291 +473,293 @@ func TestSegmentgetIntersections2(t *testing.T) {
 	var err error
 	var inter *point
 
+	op := newOperation("")
+
 	// colinear full overlap
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// colinear partial overlap upward slope
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 2, y: 2}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 2, y: 2}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
 	terr(t, err)
 	inter = &point{x: 1, y: 1}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// colinear partial overlap downward slope
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 2}, &point{x: 2, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 2}, &point{x: 2, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -1, y: 3}, &point{x: 1, y: 1}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -1, y: 3}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
 	inter = &point{x: 0, y: 2}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// colinear partial overlap horizontal
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 1}, &point{x: 2, y: 1}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 1}, &point{x: 2, y: 1}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
 	terr(t, err)
 	inter = &point{x: 1, y: 1}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// colinear partial overlap vertical
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 0, y: 3}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 0, y: 3}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 2}, &point{x: 0, y: 4}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 2}, &point{x: 0, y: 4}, nil)
 	terr(t, err)
 	inter = &point{x: 0, y: 2}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// colinear endpoint overlap
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 2, y: 2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 2, y: 2}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// colinear no overlap
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 3, y: 3}, &point{x: 4, y: 4}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 3, y: 3}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// parallel no overlap
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 3}, &point{x: 1, y: 4}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 3}, &point{x: 1, y: 4}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// intersect general
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 2, y: 2}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 2, y: 2}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 2}, &point{x: 2, y: 0}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 2}, &point{x: 2, y: 0}, nil)
 	terr(t, err)
 	inter = &point{x: 1, y: 1}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// T-intersect with an endpoint
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 2, y: 2}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 2, y: 2}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 5, y: 4}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 5, y: 4}, nil)
 	terr(t, err)
 	inter = &point{x: 1, y: 1}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// intersect with vertical
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 5}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 5}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 3, y: 0}, &point{x: 3, y: 44}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 3, y: 0}, &point{x: 3, y: 44}, nil)
 	terr(t, err)
 	inter = &point{x: 3, y: 3}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// intersect with horizontal
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 5}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 5}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 3}, &point{x: 23, y: 3}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 3}, &point{x: 23, y: 3}, nil)
 	terr(t, err)
 	inter = &point{x: 3, y: 3}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// horizontal and vertical T-intersection
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 3, y: 0}, &point{x: 3, y: 5}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 3, y: 0}, &point{x: 3, y: 5}, nil)
 	terr(t, err)
 	inter = &point{x: 3, y: 0}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// horizontal and vertical general intersection
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 3, y: -5}, &point{x: 3, y: 5}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 3, y: -5}, &point{x: 3, y: 5}, nil)
 	terr(t, err)
 	inter = &point{x: 3, y: 0}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// no intersection not even close
-	seg1, err = newSegmentFromRing(&point{x: 1000, y: 10002}, &point{x: 2000, y: 20002}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 1000, y: 10002}, &point{x: 2000, y: 20002}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -234, y: -123}, &point{x: -12, y: -23}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -234, y: -123}, &point{x: -12, y: -23}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// no intersection kinda close
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 10}, &point{x: 10, y: 0}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 10}, &point{x: 10, y: 0}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// no intersection with vertical touching bbox
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 2, y: -5}, &point{x: 2, y: 0}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 2, y: -5}, &point{x: 2, y: 0}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// shared point 1 (endpoint)
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 1}, &point{x: 0, y: 0}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 1}, &point{x: 0, y: 0}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// shared point 2 (endpoint)
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 1}, &point{x: 1, y: 1}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 1}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// T-crossing left endpoint
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0.5, y: 0.5}, &point{x: 1, y: 0}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0.5, y: 0.5}, &point{x: 1, y: 0}, nil)
 	terr(t, err)
 	inter = &point{x: 0.5, y: 0.5}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// T-crossing right endpoint
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 1}, &point{x: 0.5, y: 0.5}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 1}, &point{x: 0.5, y: 0.5}, nil)
 	terr(t, err)
 	inter = &point{x: 0.5, y: 0.5}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// full overlap
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 10, y: 10}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 10, y: 10}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 5, y: 5}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 5, y: 5}, nil)
 	terr(t, err)
 	inter = &point{x: 1, y: 1}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// shared point + overlap
-	seg1, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 10, y: 10}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 10, y: 10}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 5, y: 5}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 5, y: 5}, nil)
 	terr(t, err)
 	inter = &point{x: 5, y: 5}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// mutual overlap
-	seg1, err = newSegmentFromRing(&point{x: 3, y: 3}, &point{x: 10, y: 10}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 3, y: 3}, &point{x: 10, y: 10}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 5}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 5}, nil)
 	terr(t, err)
 	inter = &point{x: 3, y: 3}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// full overlap
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// full overlap, orientation
-	seg1, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 0, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 0, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// colinear, shared point
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 2, y: 2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 2, y: 2}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// colinear, shared other point
-	seg1, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 0, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 0, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 2, y: 2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 2, y: 2}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// colinear, one encloses other
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 2, y: 2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 2, y: 2}, nil)
 	terr(t, err)
 	inter = &point{x: 1, y: 1}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// colinear, one encloses other 2
-	seg1, err = newSegmentFromRing(&point{x: 4, y: 0}, &point{x: 0, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 4, y: 0}, &point{x: 0, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 3, y: 1}, &point{x: 1, y: 3}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 3, y: 1}, &point{x: 1, y: 3}, nil)
 	terr(t, err)
 	inter = &point{x: 1, y: 3}
 	expect(t, seg1.getIntersection(seg2).equal(*inter))
 	expect(t, seg2.getIntersection(seg1).equal(*inter))
 
 	// colinear, no overlap
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 2, y: 2}, &point{x: 4, y: 4}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 2, y: 2}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// parallel
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: -1}, &point{x: 1, y: 0}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: -1}, &point{x: 1, y: 0}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// parallel, orientation
-	seg1, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 0, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 0, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: -1}, &point{x: 1, y: 0}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: -1}, &point{x: 1, y: 0}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// parallel, position
-	seg1, err = newSegmentFromRing(&point{x: 0, y: -1}, &point{x: 1, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: -1}, &point{x: 1, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
@@ -752,11 +769,11 @@ func TestSegmentgetIntersections2(t *testing.T) {
 	// of segment A should be irrelevant to the intersection of the two segs
 	// From https://github.com/mfogel/polygon-clipping/issues/60
 	x, y := -91.41360941065206, 29.53135
-	seg1, err = newSegmentFromRing(&point{x: x, y: y}, &point{x: -91.4134943, y: 29.5310677}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: x, y: y}, &point{x: -91.4134943, y: 29.5310677}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: x, y: y}, &point{x: -91.413, y: 29.5315}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: x, y: y}, &point{x: -91.413, y: 29.5315}, nil)
 	terr(t, err)
-	s3, err = newSegmentFromRing(&point{x: -91.4137213, y: 29.5316244}, &point{x: -91.41352785864918, y: 29.53115}, nil)
+	s3, err = op.newSegmentFromRing(&point{x: -91.4137213, y: 29.5316244}, &point{x: -91.41352785864918, y: 29.53115}, nil)
 	terr(t, err)
 	pt := &point{x: x, y: y}
 	expect(t, seg1.getIntersection(s3).equal(*pt))
@@ -766,25 +783,25 @@ func TestSegmentgetIntersections2(t *testing.T) {
 
 	// endpoint intersection takes priority - issue 60-5
 	endX, endY := 55.31, -0.23544126113
-	seg1, err = newSegmentFromRing(&point{x: 18.60315316392773, y: 10.491431056669754}, &point{x: endX, y: endY}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 18.60315316392773, y: 10.491431056669754}, &point{x: endX, y: endY}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -32.42, y: 55.26}, &point{x: endX, y: endY}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -32.42, y: 55.26}, &point{x: endX, y: endY}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// endpoint intersection between very short and very vertical segment
-	seg1, err = newSegmentFromRing(&point{x: -10.000000000000004, y: 0}, &point{x: -9.999999999999995, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: -10.000000000000004, y: 0}, &point{x: -9.999999999999995, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -10.000000000000004, y: 0}, &point{x: -9.999999999999995, y: 1000}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -10.000000000000004, y: 0}, &point{x: -9.999999999999995, y: 1000}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
 
 	// avoid intersection - issue 79
-	seg1, err = newSegmentFromRing(&point{x: 145.854148864746, y: -41.99816840491791}, &point{x: 145.85421323776, y: -41.9981723915721}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 145.854148864746, y: -41.99816840491791}, &point{x: 145.85421323776, y: -41.9981723915721}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 145.854148864746, y: -41.998168404918}, &point{x: 145.8543, y: -41.9982}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 145.854148864746, y: -41.998168404918}, &point{x: 145.8543, y: -41.9982}, nil)
 	terr(t, err)
 	expect(t, seg1.getIntersection(seg2) == nil)
 	expect(t, seg2.getIntersection(seg1) == nil)
@@ -794,52 +811,54 @@ func TestsegmentCompareSegments(t *testing.T) {
 	var seg1, seg2, seg3 *segment
 	var err error
 
+	op := newOperation("")
+
 	// non intersecting
 
 	// not in same vertical space
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 4, y: 3}, &point{x: 6, y: 7}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 4, y: 3}, &point{x: 6, y: 7}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == -1)
 	expect(t, segmentCompare(seg2, seg1) == 1)
 
 	// in same vertical space, earlier is below
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: -4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: -4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 6, y: 7}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 6, y: 7}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == -1)
 	expect(t, segmentCompare(seg2, seg1) == 1)
 
 	// in same vertical space, later is below
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: -4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: -4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -5, y: -5}, &point{x: 6, y: -7}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -5, y: -5}, &point{x: 6, y: -7}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// with left points in same vertical line
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: -1}, &point{x: 5, y: -5}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: -1}, &point{x: 5, y: -5}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// with earlier right point directly under later left point
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: -1}, &point{x: 5, y: -5}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: -1}, &point{x: 5, y: -5}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// with eariler right point directly over earlier left point
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -5, y: 5}, &point{x: 0, y: 3}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -5, y: 5}, &point{x: 0, y: 3}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == -1)
 	expect(t, segmentCompare(seg2, seg1) == 1)
@@ -847,57 +866,57 @@ func TestsegmentCompareSegments(t *testing.T) {
 	// intersecting not on endpoint
 
 	// earlier c omes up from before & below
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -1, y: -5}, &point{x: 1, y: 2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -1, y: -5}, &point{x: 1, y: 2}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// earlier comes up from directly over & below
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: -2}, &point{x: 3, y: 2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: -2}, &point{x: 3, y: 2}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// earlier comes up from after & below
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 1, y: -2}, &point{x: 3, y: 2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 1, y: -2}, &point{x: 3, y: 2}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// later comes down from before & above
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -1, y: 5}, &point{x: 1, y: -2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -1, y: 5}, &point{x: 1, y: -2}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == -1)
 	expect(t, segmentCompare(seg2, seg1) == 1)
 
 	// later comes up from directly over & above
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 2}, &point{x: 3, y: -2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 2}, &point{x: 3, y: -2}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == -1)
 	expect(t, segmentCompare(seg2, seg1) == 1)
 
 	// later comes up from after & above
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 1, y: 2}, &point{x: 3, y: -2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 1, y: 2}, &point{x: 3, y: -2}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == -1)
 	expect(t, segmentCompare(seg2, seg1) == 1)
 
 	// with a vertical
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 1, y: -2}, &point{x: 1, y: 2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 1, y: -2}, &point{x: 1, y: 2}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
@@ -905,33 +924,33 @@ func TestsegmentCompareSegments(t *testing.T) {
 	// intersect but not share on an endpoint
 
 	// with a vertical
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 2, y: -2}, &point{x: 6, y: 2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 2, y: -2}, &point{x: 6, y: 2}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// intersect on left from above
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -2, y: 2}, &point{x: 2, y: -2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -2, y: 2}, &point{x: 2, y: -2}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// intersect on left from below
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -2, y: -2}, &point{x: 2, y: 2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -2, y: -2}, &point{x: 2, y: 2}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == -1)
 	expect(t, segmentCompare(seg2, seg1) == 1)
 
 	// intersect on left from vertical
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: -2}, &point{x: 0, y: 2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: -2}, &point{x: 0, y: 2}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
@@ -939,49 +958,49 @@ func TestsegmentCompareSegments(t *testing.T) {
 	// share right endpoint
 
 	// earlier comes up from before & below
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -1, y: -5}, &point{x: 4, y: 0}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -1, y: -5}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// earlier comes up from directly over & below
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: -2}, &point{x: 4, y: 0}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: -2}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// earlier comes up from after & below
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 1, y: -2}, &point{x: 4, y: 0}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 1, y: -2}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// later comes down from before & above
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -1, y: 5}, &point{x: 4, y: 0}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -1, y: 5}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == -1)
 	expect(t, segmentCompare(seg2, seg1) == 1)
 
 	// later comes up from directly over & above
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 2}, &point{x: 4, y: 0}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 2}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == -1)
 	expect(t, segmentCompare(seg2, seg1) == 1)
 
 	// later comes up from after & above
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 1, y: 2}, &point{x: 4, y: 0}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 1, y: 2}, &point{x: 4, y: 0}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == -1)
 	expect(t, segmentCompare(seg2, seg1) == 1)
@@ -989,25 +1008,25 @@ func TestsegmentCompareSegments(t *testing.T) {
 	// share left endpoint but not colinear
 
 	// earlier comes up from before & below
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 2}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// one vertical, other not
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 0, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 0, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 2}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// one segment thinks theyre colinear, but the other says no
-	seg1, err = newSegmentFromRing(&point{x: -60.6876, y: -40.83428174062278}, &point{x: -60.6841701, y: -40.83491}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: -60.6876, y: -40.83428174062278}, &point{x: -60.6841701, y: -40.83491}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -60.6876, y: -40.83428174062278}, &point{x: -60.6874, y: -40.83431837489067}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -60.6876, y: -40.83428174062278}, &point{x: -60.6874, y: -40.83431837489067}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
@@ -1015,35 +1034,35 @@ func TestsegmentCompareSegments(t *testing.T) {
 	// colinear
 
 	// partial mutual overlap
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -1, y: -1}, &point{x: 2, y: 2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -1, y: -1}, &point{x: 2, y: 2}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// complete overlap
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -1, y: -1}, &point{x: 5, y: 5}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -1, y: -1}, &point{x: 5, y: 5}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// right endpoints match
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -1, y: -1}, &point{x: 4, y: 4}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -1, y: -1}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
 
 	// left endpoints match - should be length
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 3, y: 3}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 3, y: 3}, nil)
 	terr(t, err)
-	seg3, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 5}, nil)
+	seg3, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 5}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == 1)
 	expect(t, segmentCompare(seg2, seg1) == -1)
@@ -1053,36 +1072,36 @@ func TestsegmentCompareSegments(t *testing.T) {
 	expect(t, segmentCompare(seg3, seg1) == 1)
 
 	// exactly equal segments should be sorted by ring id
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == -1)
 	expect(t, segmentCompare(seg2, seg1) == 1)
 
 	// exactly equal segments (but not identical) are consistent
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
 	result := segmentCompare(seg1, seg2)
 	expect(t, segmentCompare(seg1, seg2) == result)
 	expect(t, segmentCompare(seg2, seg1) == -result)
 
 	// segment consistency - from #60
-	seg1, err = newSegmentFromRing(&point{x: -131.57153657554915, y: 55.01963125}, &point{x: -131.571478, y: 55.0187174}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: -131.57153657554915, y: 55.01963125}, &point{x: -131.571478, y: 55.0187174}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -131.57153657554915, y: 55.01963125}, &point{x: -131.57152375603846, y: 55.01943125}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -131.57153657554915, y: 55.01963125}, &point{x: -131.57152375603846, y: 55.01943125}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == -1)
 	expect(t, segmentCompare(seg2, seg1) == 1)
 
 	// ensure transitive - part of issue 60
-	seg1, err = newSegmentFromRing(&point{x: -10.000000000000018, y: -9.17}, &point{x: -10.000000000000004, y: -8.79}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: -10.000000000000018, y: -9.17}, &point{x: -10.000000000000004, y: -8.79}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -10.000000000000016, y: 1.44}, &point{x: -9, y: 1.5}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -10.000000000000016, y: 1.44}, &point{x: -9, y: 1.5}, nil)
 	terr(t, err)
-	seg3, err = newSegmentFromRing(&point{x: -10.00000000000001, y: 1.75}, &point{x: -9, y: 1.5}, nil)
+	seg3, err = op.newSegmentFromRing(&point{x: -10.00000000000001, y: 1.75}, &point{x: -9, y: 1.5}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == -1)
 	expect(t, segmentCompare(seg2, seg3) == -1)
@@ -1092,11 +1111,11 @@ func TestsegmentCompareSegments(t *testing.T) {
 	expect(t, segmentCompare(seg3, seg1) == 1)
 
 	// ensure transitive 2 - also part of issue 60
-	seg1, err = newSegmentFromRing(&point{x: -10.000000000000002, y: 1.8181818181818183}, &point{x: -9.999999999999996, y: -3}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: -10.000000000000002, y: 1.8181818181818183}, &point{x: -9.999999999999996, y: -3}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -10.000000000000002, y: 1.8181818181818183}, &point{x: 0, y: 0}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -10.000000000000002, y: 1.8181818181818183}, &point{x: 0, y: 0}, nil)
 	terr(t, err)
-	seg3, err = newSegmentFromRing(&point{x: -10.000000000000002, y: 1.8181818181818183}, &point{x: -10.000000000000002, y: 2}, nil)
+	seg3, err = op.newSegmentFromRing(&point{x: -10.000000000000002, y: 1.8181818181818183}, &point{x: -10.000000000000002, y: 2}, nil)
 	terr(t, err)
 	expect(t, segmentCompare(seg1, seg2) == -1)
 	expect(t, segmentCompare(seg2, seg3) == -1)

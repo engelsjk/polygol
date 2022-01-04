@@ -12,7 +12,7 @@ type ringIn struct {
 	bbox       bbox
 }
 
-func newRingIn(ring [][]float64, poly *polyIn, isExterior bool) (*ringIn, error) {
+func (o *operation) newRingIn(ring [][]float64, poly *polyIn, isExterior bool) (*ringIn, error) {
 
 	if len(ring) == 0 {
 		return nil, fmt.Errorf(`Input geometry is not a valid polygon or multipolygon (empty).`)
@@ -27,7 +27,7 @@ func newRingIn(ring [][]float64, poly *polyIn, isExterior bool) (*ringIn, error)
 	ri.isExterior = isExterior
 	ri.segments = []*segment{}
 
-	firstPoint := rounder.round(ring[0][0], ring[0][1])
+	firstPoint := o.rounder.round(ring[0][0], ring[0][1])
 
 	ri.bbox = bbox{ll: *firstPoint, ur: *firstPoint}
 
@@ -38,14 +38,14 @@ func newRingIn(ring [][]float64, poly *polyIn, isExterior bool) (*ringIn, error)
 			return nil, fmt.Errorf(`Input geometry is not a valid polygon or multipolygon (missing coordinates).`)
 		}
 
-		point := rounder.round(ring[i][0], ring[i][1])
+		point := o.rounder.round(ring[i][0], ring[i][1])
 
 		// skip repeated points
 		if point.x == prevPoint.x && point.y == prevPoint.y {
 			continue
 		}
 
-		segment, err := newSegmentFromRing(prevPoint, point, ri)
+		segment, err := o.newSegmentFromRing(prevPoint, point, ri)
 		if err != nil {
 			return nil, err
 		}
@@ -67,7 +67,7 @@ func newRingIn(ring [][]float64, poly *polyIn, isExterior bool) (*ringIn, error)
 	}
 	// add segment from last to first if last is not the same as first
 	if firstPoint.x != prevPoint.x || firstPoint.y != prevPoint.y {
-		segment, err := newSegmentFromRing(prevPoint, firstPoint, ri)
+		segment, err := o.newSegmentFromRing(prevPoint, firstPoint, ri)
 		if err != nil {
 			return nil, err
 		}
@@ -104,7 +104,7 @@ type polyIn struct {
 	bbox          bbox
 }
 
-func newPolyIn(poly [][][]float64, multiPoly *multiPolyIn) (*polyIn, error) {
+func (o *operation) newPolyIn(poly [][][]float64, multiPoly *multiPolyIn) (*polyIn, error) {
 
 	if len(poly) == 0 {
 		return nil, fmt.Errorf(`Input geometry is not a valid polygon or multipolygon (empty).`)
@@ -112,7 +112,7 @@ func newPolyIn(poly [][][]float64, multiPoly *multiPolyIn) (*polyIn, error) {
 
 	pi := &polyIn{}
 
-	exteriorRing, err := newRingIn(poly[0], pi, true)
+	exteriorRing, err := o.newRingIn(poly[0], pi, true)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func newPolyIn(poly [][][]float64, multiPoly *multiPolyIn) (*polyIn, error) {
 	pi.interiorRings = []*ringIn{}
 
 	for i := 1; i < len(poly); i++ {
-		ring, err := newRingIn(poly[i], pi, false)
+		ring, err := o.newRingIn(poly[i], pi, false)
 		if err != nil {
 			return nil, err
 		}
@@ -171,7 +171,7 @@ type multiPolyIn struct {
 	isSubject bool
 }
 
-func newMultiPolyIn(multiPoly [][][][]float64, isSubject bool) (*multiPolyIn, error) {
+func (o *operation) newMultiPolyIn(multiPoly [][][][]float64, isSubject bool) (*multiPolyIn, error) {
 
 	mpi := &multiPolyIn{}
 
@@ -182,7 +182,7 @@ func newMultiPolyIn(multiPoly [][][][]float64, isSubject bool) (*multiPolyIn, er
 	}
 
 	for i := 0; i < len(multiPoly); i++ {
-		poly, err := newPolyIn(multiPoly[i], mpi)
+		poly, err := o.newPolyIn(multiPoly[i], mpi)
 		if err != nil {
 			return nil, err
 		}

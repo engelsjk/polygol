@@ -114,6 +114,8 @@ func TestEndToEnd(t *testing.T) {
 
 			t.Run(testCase.Name, func(t *testing.T) {
 
+				t.Parallel() // run all end-to-end tests in parallel
+
 				if contains(opsSkip, testCase.OperationType) {
 					fmt.Printf("skipping op type %s...\n", testCase.OperationType)
 				}
@@ -124,7 +126,7 @@ func TestEndToEnd(t *testing.T) {
 
 				expected := geoms[0]
 
-				result, err := op.run(testCase.OperationType, args[0], args[1:]...)
+				result, err := newOperation(testCase.OperationType).run(args[0], args[1:]...)
 				if err != nil {
 					t.Error(err)
 				}

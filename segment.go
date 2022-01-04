@@ -4,10 +4,7 @@ import (
 	"fmt"
 )
 
-var segmentID = 1
-
 type segment struct {
-	init            bool
 	id              int
 	leftSE          *sweepEvent
 	rightSE         *sweepEvent
@@ -22,21 +19,29 @@ type segment struct {
 	prevSegInResult *segment
 	after           *state
 	before          *state
+	op              *operation
 }
 
-func newSegment(leftSE, rightSE *sweepEvent, rings []*ringIn, windings []int) *segment {
+func (o *operation) newSegment(leftSE, rightSE *sweepEvent, rings []*ringIn, windings []int) *segment {
+	o.segmentID++
+
 	s := &segment{}
-	segmentID++
-	s.id = segmentID
+	s.id = o.segmentID
 	s.leftSE = leftSE
+
 	leftSE.segment = s
 	leftSE.otherSE = rightSE
+
 	s.rightSE = rightSE
+
 	rightSE.segment = s
 	rightSE.otherSE = leftSE
+
 	s.rings = rings
 	s.windings = windings
-	s.init = true
+
+	s.op = o
+
 	return s
 }
 
@@ -205,7 +210,7 @@ func segmentCompare(a, b interface{}) int {
 	return 0
 }
 
-func newSegmentFromRing(pt1, pt2 *point, ring *ringIn) (*segment, error) {
+func (o *operation) newSegmentFromRing(pt1, pt2 *point, ring *ringIn) (*segment, error) {
 
 	var leftPt, rightPt *point
 	var winding int
@@ -226,7 +231,7 @@ func newSegmentFromRing(pt1, pt2 *point, ring *ringIn) (*segment, error) {
 	leftSE := newSweepEvent(leftPt, true)
 	rightSE := newSweepEvent(rightPt, false)
 
-	return newSegment(leftSE, rightSE, []*ringIn{ring}, []int{winding}), nil
+	return o.newSegment(leftSE, rightSE, []*ringIn{ring}, []int{winding}), nil
 }
 
 func (s *segment) replaceRightSE(newRightSE *sweepEvent) {
@@ -440,7 +445,7 @@ func (s *segment) getIntersection(other *segment) *point {
 		return nil
 	}
 
-	return rounder.round(ptInter.x, ptInter.y)
+	return s.op.rounder.round(ptInter.x, ptInter.y)
 }
 
 func lineToLineIntersection(
@@ -505,9 +510,7 @@ func (s *segment) split(point *point) []*sweepEvent {
 	newWindings := make([]int, len(s.windings))
 	copy(newWindings, s.windings)
 
-	newSeg := newSegment(newLeftSE, oldRightSE, newRings, newWindings)
-
-	// newSeg := NewSegment(newLeftSE, oldRightSE, s.rings, s.windings)
+	newSeg := s.op.newSegment(newLeftSE, oldRightSE, newRings, newWindings)
 
 	// when splitting a nearly vertical downward-facing segment,
 	// sometimes one of the resulting new segments is vertical, in which
@@ -721,7 +724,7 @@ func (s *segment) isInResult() bool {
 	mpsBefore := s.beforeState().multiPolys
 	mpsAfter := s.afterState().multiPolys
 
-	switch operationType {
+	switch s.op.opType {
 	case "union":
 		// UNION - included iff:
 		//  * On one side of us there is 0 poly interiors AND
@@ -743,7 +746,7 @@ func (s *segment) isInResult() bool {
 			least = len(mpsAfter)
 			most = len(mpsBefore)
 		}
-		s.inResult = most == op.numMultiPolys && least < most
+		s.inResult = most == s.op.numMultiPolys && least < most
 		s.doneInResult = true
 	case "xor":
 		// XOR - included iff:
@@ -761,7 +764,7 @@ func (s *segment) isInResult() bool {
 		s.inResult = isJustSubject(mpsBefore) != isJustSubject(mpsAfter)
 		s.doneInResult = true
 	default:
-		fmt.Printf("Unrecognized operation type found %s", operationType)
+		fmt.Printf("Unrecognized operation type found %s", s.op.opType)
 	}
 	return s.inResult
 }

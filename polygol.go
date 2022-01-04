@@ -1,24 +1,41 @@
 package polygol
 
-var rounder *ptRounder
-var op operation
+type Geom [][][][]float64
 
-func init() {
-	rounder = newPtRounder()
+type Polygol struct{}
+
+func New() *Polygol {
+	return &Polygol{}
+}
+
+func (p *Polygol) Union(geom Geom, moreGeoms ...Geom) (Geom, error) {
+	return newOperation("union").run(geom, moreGeoms...)
+}
+
+func (p *Polygol) Intersection(geom Geom, moreGeoms ...Geom) (Geom, error) {
+	return newOperation("intersection").run(geom, moreGeoms...)
+}
+
+func (p *Polygol) Difference(geom Geom, moreGeoms ...Geom) (Geom, error) {
+	return newOperation("difference").run(geom, moreGeoms...)
+}
+
+func (p *Polygol) XOR(geom Geom, moreGeoms ...Geom) (Geom, error) {
+	return newOperation("xor").run(geom, moreGeoms...)
 }
 
 func Union(geom Geom, moreGeoms ...Geom) (Geom, error) {
-	return op.run("union", geom, moreGeoms...)
+	return New().Union(geom, moreGeoms...)
 }
 
 func Intersection(geom Geom, moreGeoms ...Geom) (Geom, error) {
-	return op.run("intersection", geom, moreGeoms...)
-}
-
-func XOR(geom Geom, moreGeoms ...Geom) (Geom, error) {
-	return op.run("xor", geom, moreGeoms...)
+	return New().Intersection(geom, moreGeoms...)
 }
 
 func Difference(geom Geom, moreGeoms ...Geom) (Geom, error) {
-	return op.run("difference", geom, moreGeoms...)
+	return New().Difference(geom, moreGeoms...)
+}
+
+func XOR(geom Geom, moreGeoms ...Geom) (Geom, error) {
+	return New().XOR(geom, moreGeoms...)
 }

@@ -6,31 +6,37 @@ import (
 	splaytree "github.com/engelsjk/splay-tree"
 )
 
-var (
+const (
 	polygonClippingMaxQueueSize         = 1000000
 	polygonClippingMaxSweepLineSegments = 1000000
 )
 
-type Geom [][][][]float64
-
-var operationType string
-
 type operation struct {
+	rounder       *ptRounder
+	opType        string
 	numMultiPolys int
+	segmentID     int
 }
 
-func (op *operation) run(optype string, geom Geom, moreGeoms ...Geom) (Geom, error) {
+func newOperation(opType string) *operation {
+	rounder := newPtRounder()
+	return &operation{
+		rounder: rounder,
+		opType:  opType,
+	}
+}
 
-	operationType = optype
-	rounder.reset()
+func (o *operation) run(geom Geom, moreGeoms ...Geom) (Geom, error) {
 
-	multiPolys, err := geomsToMultiPolys(geom, moreGeoms)
+	o.rounder.reset()
+
+	multiPolys, err := o.geomsToMultiPolys(geom, moreGeoms)
 	if err != nil {
 		return Geom{}, err
 	}
-	op.numMultiPolys = len(multiPolys)
+	o.numMultiPolys = len(multiPolys)
 
-	switch operationType {
+	switch o.opType {
 	// BBox optimization for difference operation
 	// If the bbox of a multipolygon that's part of the clipping doesn't
 	// intersect the bbox of the subject at all, we can just drop that
@@ -134,7 +140,7 @@ func (op *operation) run(optype string, geom Geom, moreGeoms ...Geom) (Geom, err
 	}
 
 	// Free some memory we don't need anymore.
-	rounder.reset()
+	o.rounder.reset()
 
 	// Collect and compile segments we're keeping into a multipolygon.
 	ringsOut, err := newRingOutFromSegments(sweepLine.segments)
@@ -147,15 +153,15 @@ func (op *operation) run(optype string, geom Geom, moreGeoms ...Geom) (Geom, err
 	return result.getGeom(), nil
 }
 
-func geomsToMultiPolys(geom Geom, moreGeoms []Geom) ([]*multiPolyIn, error) {
+func (o *operation) geomsToMultiPolys(geom Geom, moreGeoms []Geom) ([]*multiPolyIn, error) {
 	// Convert inputs to MultiPoly objects.
-	multiPoly, err := newMultiPolyIn(geom, true)
+	multiPoly, err := o.newMultiPolyIn(geom, true)
 	if err != nil {
 		return nil, err
 	}
 	multiPolys := []*multiPolyIn{multiPoly}
 	for i := 0; i < len(moreGeoms); i++ {
-		multiPoly, err := newMultiPolyIn(moreGeoms[i], false)
+		multiPoly, err := o.newMultiPolyIn(moreGeoms[i], false)
 		if err != nil {
 			continue
 		}

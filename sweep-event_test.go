@@ -9,6 +9,8 @@ func TestsweepEventCompare(t *testing.T) {
 	var seg1, seg2 *segment
 	var err error
 
+	op := newOperation("")
+
 	// favor earlier x in point
 	se1 = newSweepEvent(&point{x: -5, y: 4}, false)
 	se2 = newSweepEvent(&point{x: 5, y: 1}, false)
@@ -22,33 +24,33 @@ func TestsweepEventCompare(t *testing.T) {
 	expect(t, sweepEventCompare(se2, se1) == 1)
 
 	// then favor right events over left
-	seg1, err = newSegmentFromRing(&point{x: 5, y: 4}, &point{x: 3, y: 2}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 5, y: 4}, &point{x: 3, y: 2}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 5, y: 4}, &point{x: 6, y: 5}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 5, y: 4}, &point{x: 6, y: 5}, nil)
 	terr(t, err)
 	expect(t, sweepEventCompare(seg1.rightSE, seg2.leftSE) == -1)
 	expect(t, sweepEventCompare(seg2.leftSE, seg1.rightSE) == 1)
 
 	// then favor non-vertical segments for left events
-	seg1, err = newSegmentFromRing(&point{x: 3, y: 2}, &point{x: 3, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 3, y: 2}, &point{x: 3, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 3, y: 2}, &point{x: 5, y: 4}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 3, y: 2}, &point{x: 5, y: 4}, nil)
 	terr(t, err)
 	expect(t, sweepEventCompare(seg1.leftSE, seg2.rightSE) == -1)
 	expect(t, sweepEventCompare(seg2.rightSE, seg1.leftSE) == 1)
 
 	// then favor vertical segments for right events
-	seg1, err = newSegmentFromRing(&point{x: 3, y: 4}, &point{x: 3, y: 2}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 3, y: 4}, &point{x: 3, y: 2}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 3, y: 4}, &point{x: 1, y: 2}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 3, y: 4}, &point{x: 1, y: 2}, nil)
 	terr(t, err)
 	expect(t, sweepEventCompare(seg1.leftSE, seg2.rightSE) == -1)
 	expect(t, sweepEventCompare(seg2.rightSE, seg1.leftSE) == 1)
 
 	// then favor lower segment
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 6}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 6}, nil)
 	terr(t, err)
 	expect(t, sweepEventCompare(seg1.leftSE, seg2.rightSE) == -1)
 	expect(t, sweepEventCompare(seg2.rightSE, seg1.leftSE) == 1)
@@ -58,17 +60,17 @@ func TestsweepEventCompare(t *testing.T) {
 	// they aren't colinear. This happens because a longer segment
 	// is able to better determine what is and is not colinear.
 	// and favor barely lower segment
-	seg1, err = newSegmentFromRing(&point{x: -75.725, y: 45.357}, &point{x: -75.72484615384616, y: 45.35723076923077}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: -75.725, y: 45.357}, &point{x: -75.72484615384616, y: 45.35723076923077}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -75.725, y: 45.357}, &point{x: -75.723, y: 45.36}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -75.725, y: 45.357}, &point{x: -75.723, y: 45.36}, nil)
 	terr(t, err)
 	expect(t, sweepEventCompare(seg1.leftSE, seg2.leftSE) == 1)
 	expect(t, sweepEventCompare(seg2.leftSE, seg1.leftSE) == -1)
 
 	// then favor lower ring id
-	seg1, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 4, y: 4}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 5}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 5, y: 5}, nil)
 	terr(t, err)
 	expect(t, sweepEventCompare(seg1.leftSE, seg2.leftSE) == -1)
 	expect(t, sweepEventCompare(seg2.leftSE, seg1.leftSE) == 1)
@@ -76,16 +78,16 @@ func TestsweepEventCompare(t *testing.T) {
 	// identical equal
 	se1 = newSweepEvent(&point{x: 0, y: 0}, false)
 	se3 = newSweepEvent(&point{x: 3, y: 3}, false)
-	newSegment(se1, se3, nil, nil)
-	newSegment(se1, se3, nil, nil)
+	op.newSegment(se1, se3, nil, nil)
+	op.newSegment(se1, se3, nil, nil)
 	expect(t, sweepEventCompare(se1, se1) == 0)
 
 	// totally equal but not identical events are consistent
 	se1 = newSweepEvent(&point{x: 0, y: 0}, false)
 	se2 = newSweepEvent(&point{x: 0, y: 0}, false)
 	se3 = newSweepEvent(&point{x: 3, y: 3}, false)
-	newSegment(se1, se3, nil, nil)
-	newSegment(se2, se3, nil, nil)
+	op.newSegment(se1, se3, nil, nil)
+	op.newSegment(se2, se3, nil, nil)
 	result := sweepEventCompare(se1, se2)
 	expect(t, sweepEventCompare(se1, se2) == result)
 	expect(t, sweepEventCompare(se2, se1) == -result)
@@ -93,17 +95,17 @@ func TestsweepEventCompare(t *testing.T) {
 	// events are linked as side effect
 	se1 = newSweepEvent(&point{x: 0, y: 0}, false)
 	se2 = newSweepEvent(&point{x: 0, y: 0}, false)
-	newSegment(se1, newSweepEvent(&point{x: 2, y: 2}, false), nil, nil)
-	newSegment(se2, newSweepEvent(&point{x: 3, y: 4}, false), nil, nil)
+	op.newSegment(se1, newSweepEvent(&point{x: 2, y: 2}, false), nil, nil)
+	op.newSegment(se2, newSweepEvent(&point{x: 3, y: 4}, false), nil, nil)
 	expect(t, se1.point.equal(*se2.point))
 	sweepEventCompare(se1, se2)
 	expect(t, se1.point.equal(*se2.point))
 
 	// consistency edge case
 	// harvested from https://github.com/mfogel/polygon-clipping/issues/62
-	seg1, err = newSegmentFromRing(&point{x: -71.0390933353125, y: 41.504475}, &point{x: -71.0389879, y: 41.5037842}, nil)
+	seg1, err = op.newSegmentFromRing(&point{x: -71.0390933353125, y: 41.504475}, &point{x: -71.0389879, y: 41.5037842}, nil)
 	terr(t, err)
-	seg2, err = newSegmentFromRing(&point{x: -71.0390933353125, y: 41.504475}, &point{x: -71.03906280974431, y: 41.5042756}, nil)
+	seg2, err = op.newSegmentFromRing(&point{x: -71.0390933353125, y: 41.504475}, &point{x: -71.03906280974431, y: 41.5042756}, nil)
 	terr(t, err)
 	expect(t, sweepEventCompare(seg1.leftSE, seg2.leftSE) == -1)
 	expect(t, sweepEventCompare(seg2.leftSE, seg1.leftSE) == 1)
@@ -126,6 +128,8 @@ func TestSweepEventLink(t *testing.T) {
 	var p1, p2 *point
 	var err error
 
+	op := newOperation("")
+
 	// no linked events
 	se1 = newSweepEvent(&point{x: 0, y: 0}, false)
 	expect(t, equalSweepEvents(se1.point.events, []*sweepEvent{se1}))
@@ -137,10 +141,10 @@ func TestSweepEventLink(t *testing.T) {
 	se2 = newSweepEvent(p1, false)
 	se3 = newSweepEvent(p2, false)
 	se4 = newSweepEvent(p2, false)
-	newSegment(se1, newSweepEvent(&point{x: 5, y: 5}, false), nil, nil)
-	newSegment(se2, newSweepEvent(&point{x: 6, y: 6}, false), nil, nil)
-	newSegment(se3, newSweepEvent(&point{x: 7, y: 7}, false), nil, nil)
-	newSegment(se4, newSweepEvent(&point{x: 8, y: 8}, false), nil, nil)
+	op.newSegment(se1, newSweepEvent(&point{x: 5, y: 5}, false), nil, nil)
+	op.newSegment(se2, newSweepEvent(&point{x: 6, y: 6}, false), nil, nil)
+	op.newSegment(se3, newSweepEvent(&point{x: 7, y: 7}, false), nil, nil)
+	op.newSegment(se4, newSweepEvent(&point{x: 8, y: 8}, false), nil, nil)
 	err = se1.link(se3)
 	terr(t, err)
 	expect(t, len(se1.point.events) == 4)
@@ -186,25 +190,27 @@ func TestSweepEventgetLeftMostComparator(t *testing.T) {
 	var comparator func(a, b *sweepEvent) int
 	var se1, se2, se3, se4, se5 *sweepEvent
 
+	op := newOperation("")
+
 	// after a segment straight to the right
 	prevEvent = newSweepEvent(&point{x: 0, y: 0}, false)
 	event = newSweepEvent(&point{x: 1, y: 0}, false)
 	comparator = event.getLeftMostComparator(prevEvent)
 
 	se1 = newSweepEvent(&point{x: 1, y: 0}, false)
-	newSegment(se1, newSweepEvent(&point{x: 0, y: 1}, false), nil, nil)
+	op.newSegment(se1, newSweepEvent(&point{x: 0, y: 1}, false), nil, nil)
 
 	se2 = newSweepEvent(&point{x: 1, y: 0}, false)
-	newSegment(se2, newSweepEvent(&point{x: 1, y: 1}, false), nil, nil)
+	op.newSegment(se2, newSweepEvent(&point{x: 1, y: 1}, false), nil, nil)
 
 	se3 = newSweepEvent(&point{x: 1, y: 0}, false)
-	newSegment(se3, newSweepEvent(&point{x: 2, y: 0}, false), nil, nil)
+	op.newSegment(se3, newSweepEvent(&point{x: 2, y: 0}, false), nil, nil)
 
 	se4 = newSweepEvent(&point{x: 1, y: 0}, false)
-	newSegment(se4, newSweepEvent(&point{x: 1, y: -1}, false), nil, nil)
+	op.newSegment(se4, newSweepEvent(&point{x: 1, y: -1}, false), nil, nil)
 
 	se5 = newSweepEvent(&point{x: 1, y: 0}, false)
-	newSegment(se5, newSweepEvent(&point{x: 0, y: -1}, false), nil, nil)
+	op.newSegment(se5, newSweepEvent(&point{x: 0, y: -1}, false), nil, nil)
 
 	expect(t, comparator(se1, se2) == -1)
 	expect(t, comparator(se2, se3) == -1)
@@ -228,16 +234,16 @@ func TestSweepEventgetLeftMostComparator(t *testing.T) {
 	comparator = event.getLeftMostComparator(prevEvent)
 
 	se1 = newSweepEvent(&point{x: 0, y: 0}, false)
-	newSegment(se1, newSweepEvent(&point{x: 0, y: 1}, false), nil, nil)
+	op.newSegment(se1, newSweepEvent(&point{x: 0, y: 1}, false), nil, nil)
 
 	se2 = newSweepEvent(&point{x: 0, y: 0}, false)
-	newSegment(se2, newSweepEvent(&point{x: 1, y: 0}, false), nil, nil)
+	op.newSegment(se2, newSweepEvent(&point{x: 1, y: 0}, false), nil, nil)
 
 	se3 = newSweepEvent(&point{x: 0, y: 0}, false)
-	newSegment(se3, newSweepEvent(&point{x: 0, y: -1}, false), nil, nil)
+	op.newSegment(se3, newSweepEvent(&point{x: 0, y: -1}, false), nil, nil)
 
 	se4 = newSweepEvent(&point{x: 0, y: 0}, false)
-	newSegment(se4, newSweepEvent(&point{x: -1, y: 0}, false), nil, nil)
+	op.newSegment(se4, newSweepEvent(&point{x: -1, y: 0}, false), nil, nil)
 
 	expect(t, comparator(se1, se2) == 1)
 	expect(t, comparator(se1, se3) == 1)

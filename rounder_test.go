@@ -7,6 +7,8 @@ import (
 func TestRounderRound(t *testing.T) {
 	var pt1, pt2, pt3 *point
 
+	rounder := newPtRounder()
+
 	// no overlap
 	rounder.reset()
 	pt1 = &point{x: 3, y: 4}

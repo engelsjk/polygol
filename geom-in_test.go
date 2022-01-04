@@ -9,6 +9,8 @@ func TestRingIn(t *testing.T) {
 	var err error
 	var ring [][]float64
 
+	op := newOperation("")
+
 	// create exterior ring
 	ring = [][]float64{
 		{0, 0},
@@ -19,7 +21,7 @@ func TestRingIn(t *testing.T) {
 	expectedPt2 := &point{x: 1, y: 0}
 	expectedPt3 := &point{x: 1, y: 1}
 	poly := &polyIn{}
-	ringIn, err = newRingIn(ring, poly, true)
+	ringIn, err = op.newRingIn(ring, poly, true)
 	terr(t, err)
 	poly.exteriorRing = ringIn
 
@@ -37,12 +39,14 @@ func TestRingIn(t *testing.T) {
 
 	// create an interior ring
 	ring = [][]float64{{0, 0}, {1, 1}, {1, 0}}
-	ringIn, err = newRingIn(ring, &polyIn{}, false)
+	ringIn, err = op.newRingIn(ring, &polyIn{}, false)
 	terr(t, err)
 	expect(t, !ringIn.isExterior)
 }
 
 func TestPolyIn(t *testing.T) {
+
+	op := newOperation("")
 
 	// creation
 	multiPolyIn := &multiPolyIn{}
@@ -51,7 +55,7 @@ func TestPolyIn(t *testing.T) {
 		{{0, 0}, {1, 1}, {1, 0}},
 		{{2, 2}, {2, 3}, {3, 3}, {3, 2}},
 	}
-	polyIn, err := newPolyIn(poly, multiPolyIn)
+	polyIn, err := op.newPolyIn(poly, multiPolyIn)
 	terr(t, err)
 
 	expect(t, polyIn.multiPoly == multiPolyIn)
@@ -67,8 +71,10 @@ func TestmultiPolyIn(t *testing.T) {
 	var multiPolyIn *multiPolyIn
 	var err error
 
+	op := newOperation("")
+
 	// creation with multipoly
-	multiPolyIn, err = newMultiPolyIn([][][][]float64{
+	multiPolyIn, err = op.newMultiPolyIn([][][][]float64{
 		{{{0, 0}, {1, 1}, {0, 1}}},
 		{
 			{{0, 0}, {4, 0}, {4, 9}},
@@ -81,7 +87,7 @@ func TestmultiPolyIn(t *testing.T) {
 	expect(t, len(multiPolyIn.getSweepEvents()) == 18)
 
 	// creation with poly
-	multiPolyIn, err = newMultiPolyIn([][][][]float64{
+	multiPolyIn, err = op.newMultiPolyIn([][][][]float64{
 		{{{0, 0}, {1, 1}, {0, 1}, {0, 0}}},
 	}, false)
 	terr(t, err)
@@ -90,7 +96,7 @@ func TestmultiPolyIn(t *testing.T) {
 	expect(t, len(multiPolyIn.getSweepEvents()) == 6)
 
 	// third or more coordinates are ignored
-	multiPolyIn, err = newMultiPolyIn([][][][]float64{
+	multiPolyIn, err = op.newMultiPolyIn([][][][]float64{
 		{{{0, 0, 42}, {1, 1, 128}, {0, 1, 84}, {0, 0, 42}}},
 	}, false)
 	terr(t, err)
@@ -108,7 +114,7 @@ func TestmultiPolyIn(t *testing.T) {
 	// creation with multipolygon with invalid coordinates
 
 	// creation with multipolygon with missing coordinates
-	_, err = newMultiPolyIn([][][][]float64{
+	_, err = op.newMultiPolyIn([][][][]float64{
 		{{{0}, {0, 1}, {1, 0}}},
 	}, false)
 	expect(t, err != nil)

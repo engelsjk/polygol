@@ -8,7 +8,6 @@ import (
 type sweepEvent struct {
 	point      *point
 	isLeft     bool
-	init       bool
 	segment    *segment
 	consumedBy *sweepEvent
 	otherSE    *sweepEvent
@@ -27,7 +26,6 @@ func newSweepEvent(point *point, isLeft bool) *sweepEvent {
 	}
 	se.point = point
 	se.isLeft = isLeft
-	se.init = true
 	return se
 }
 
