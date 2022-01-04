@@ -1,6 +1,6 @@
 # polygol
 
-Boolean polygon clipping/overlay operations (union, intersection, difference, xor) on Polygons and MultiPolygons. A pure Go port of the [mfogel/polygon-clipping](https://github.com/mfogel/polygon-clipping) JS library.
+Boolean polygon clipping/overlay operations (union, intersection, difference, xor) on Polygon and MultiPolygon geometry. A pure Go port of the [mfogel/polygon-clipping](https://github.com/mfogel/polygon-clipping) JS library.
 
 ## Quickstart
 
