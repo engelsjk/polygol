@@ -61,11 +61,6 @@ func (sl *sweepLine) process(event *sweepEvent) ([]*sweepEvent, error) {
 	}
 
 	if node == nil {
-		// fmt.Printf("event: %s\n", fmtSweepEvent(event))
-		// fmt.Printf("segment: %s\n", fmtSegment(segment))
-		// fmt.Printf("node: %+v\n", node)
-		// logTree(sl.tree)
-
 		return nil, fmt.Errorf(
 			`Unable to find segment #%d [%f, %f] -> [%f, %f] in SweepLine tree. 
 			Please submit a bug report.`,
