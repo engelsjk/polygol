@@ -57,7 +57,6 @@ func (cr *coordRounder) round(coord float64) float64 {
 	prevNode := cr.tree.Prev(node)
 	if prevNode != nil {
 		prevItem := prevNode.Item().(float64)
-		// fmt.Printf("item: %f <> prevItem: %f\n", item, prevItem)
 		if flpCmp(item, prevItem) == 0 {
 			cr.tree.Remove(coord)
 			return prevItem
@@ -67,7 +66,6 @@ func (cr *coordRounder) round(coord float64) float64 {
 	nextNode := cr.tree.Next(node)
 	if nextNode != nil {
 		nextItem := nextNode.Item().(float64)
-		// fmt.Printf("item: %f <> nextItem: %f\n", item, nextItem)
 		if flpCmp(item, nextItem) == 0 {
 			cr.tree.Remove(coord)
 			return nextItem

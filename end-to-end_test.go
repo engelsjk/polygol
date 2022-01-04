@@ -119,6 +119,7 @@ func TestEndToEnd(t *testing.T) {
 				if contains(opsSkip, testCase.OperationType) {
 					fmt.Printf("skipping op type %s...\n", testCase.OperationType)
 				}
+
 				geoms, err := loadGeoms(testCase.ResultPath, true)
 				if err != nil {
 					t.Fatal(err)
@@ -130,10 +131,28 @@ func TestEndToEnd(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
+
+				fmt.Printf("%+v\n", result)
+
 				expect(t, equalMultiPoly(expected, result))
 			})
 		}
 	}
+}
+
+func TestAsiaUnion(t *testing.T) {
+
+	geoms, err := loadGeoms("test/end-to-end/asia-union/args.geojson", false)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	union, err := Union(Geom{}, geoms...)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%+v\n", union)
 }
 
 func contains(s []string, str string) bool {
