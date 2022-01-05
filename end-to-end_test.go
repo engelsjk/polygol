@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/engelsjk/polygol/geojson"
+	geojson "github.com/paulmach/go.geojson"
 )
 
 const (
@@ -140,19 +140,23 @@ func TestEndToEnd(t *testing.T) {
 	}
 }
 
-func TestAsiaUnion(t *testing.T) {
+func TestAsiaUnion(t *testing.T) {}
 
-	geoms, err := loadGeoms("test/end-to-end/asia-union/args.geojson", false)
+func TestIranAfghanistan(t *testing.T) {
+
+	geoms, err := loadGeoms("test/end-to-end/iran-afghanistan/args.geojson", false)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	union, err := Union(Geom{}, geoms...)
+	union, err := Union(geoms[0], geoms[1])
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%+v\n", union)
+	g := geojson.NewMultiPolygonGeometry(union...)
+	b, _ := g.MarshalJSON()
+	fmt.Printf("%s", string(b))
 }
 
 func contains(s []string, str string) bool {

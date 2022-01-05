@@ -57,6 +57,7 @@ func segmentCompare(a, b interface{}) int {
 
 	// check if they're even in the same vertical plane
 	if brx < alx {
+		fmt.Println("1:1")
 		return 1
 	}
 	if arx < blx {
@@ -73,29 +74,36 @@ func segmentCompare(a, b interface{}) int {
 
 		// are the two segments in the same horizontal plane?
 		if bly < aly && bly < ary {
+			fmt.Println("3:1")
 			return 1
 		}
 		if bly > aly && bly > ary {
+			fmt.Println("4:-1")
 			return -1
 		}
 
 		// is the B left endpoint colinear to segment A?
 		aCmpBLeft := aSeg.comparePoint(bSeg.leftSE.point)
+		fmt.Printf("aCmpBLeft: %d\n", aCmpBLeft)
 		if aCmpBLeft < 0 {
+			fmt.Println("5:1")
 			return 1
 		}
 		if aCmpBLeft > 0 {
+			fmt.Println("6:-1")
 			return -1
 		}
 
 		// is the A right endpoint colinear to segment B ?
 		bCmpARight := bSeg.comparePoint(aSeg.rightSE.point)
 		if bCmpARight != 0 {
+			fmt.Printf("7:%d\n", bCmpARight)
 			return bCmpARight
 		}
 
 		// colinear segments, consider the one with left-more
 		// left endpoint to be first (arbitrary?)
+		fmt.Println("8:-1")
 		return -1
 	}
 
@@ -103,29 +111,35 @@ func segmentCompare(a, b interface{}) int {
 	if alx > blx {
 
 		if aly < bly && aly < bry {
+			fmt.Println("9:-1")
 			return -1
 		}
 		if aly > bly && aly > bry {
+			fmt.Println("10:1")
 			return 1
 		}
 
 		// is the A left endpoint colinear to segment B?
 		bCmpALeft := bSeg.comparePoint(aSeg.leftSE.point)
 		if bCmpALeft != 0 {
+			fmt.Printf("11:%d\n", bCmpALeft)
 			return bCmpALeft
 		}
 
 		// is the B right endpoint colinear to segment A?
 		aCmpBRight := aSeg.comparePoint(bSeg.rightSE.point)
 		if aCmpBRight < 0 {
+			fmt.Println("12:1")
 			return 1
 		}
 		if aCmpBRight > 0 {
+			fmt.Println("13:-1")
 			return -1
 		}
 
 		// colinear segments, consider the one with left-more
 		// left endpoint to be first (arbitrary?)
+		fmt.Println("14:1")
 		return 1
 	}
 
@@ -134,9 +148,11 @@ func segmentCompare(a, b interface{}) int {
 
 	// consider the lower left-endpoint to come first
 	if aly < bly {
+		fmt.Println("15:-1")
 		return -1
 	}
 	if aly > bly {
+		fmt.Println("16:1")
 		return 1
 	}
 
@@ -147,6 +163,7 @@ func segmentCompare(a, b interface{}) int {
 	if arx < brx {
 		bCmpARight := bSeg.comparePoint(aSeg.rightSE.point)
 		if bCmpARight != 0 {
+			fmt.Printf("17:%d\n", bCmpARight)
 			return bCmpARight
 		}
 	}
@@ -155,9 +172,11 @@ func segmentCompare(a, b interface{}) int {
 	if arx > brx {
 		aCmpBRight := aSeg.comparePoint(bSeg.rightSE.point)
 		if aCmpBRight < 0 {
+			fmt.Println("18:1")
 			return 1
 		}
 		if aCmpBRight > 0 {
+			fmt.Println("19:-1")
 			return -1
 		}
 	}
@@ -170,9 +189,11 @@ func segmentCompare(a, b interface{}) int {
 		by := bry - bly
 		bx := brx - blx
 		if ay > ax && by < bx {
+			fmt.Println("20:1")
 			return 1
 		}
 		if ay < ax && by > bx {
+			fmt.Println("21:-1")
 			return -1
 		}
 	}
@@ -180,9 +201,11 @@ func segmentCompare(a, b interface{}) int {
 	// we have colinear segments with matching orientation
 	// consider the one with more left-more right endpoint to be first
 	if arx > brx {
+		fmt.Println("22:1")
 		return 1
 	}
 	if arx < brx {
+		fmt.Println("23:-1")
 		return -1
 	}
 
@@ -191,22 +214,27 @@ func segmentCompare(a, b interface{}) int {
 
 	// consider the lower right-endpoint to come first
 	if ary < bry {
+		fmt.Println("24:-1")
 		return -1
 	}
 	if ary > bry {
+		fmt.Println("25:1")
 		return 1
 	}
 
 	// right endpoints identical as well, so the segments are identical
 	// fall back on creation order as consistent tie-breaker
 	if aSeg.id < bSeg.id {
+		fmt.Println("26:-1")
 		return -1
 	}
 	if aSeg.id > bSeg.id {
+		fmt.Println("27:1")
 		return 1
 	}
 
 	// identical segment, ie a === b
+	fmt.Println("28:0")
 	return 0
 }
 
@@ -276,11 +304,13 @@ func (s *segment) isAndEndpoint(point *point) bool {
 	if point == nil {
 		return false
 	}
-	if s.leftSE == nil {
+	if s.leftSE == nil || s.rightSE == nil {
 		return false
 	}
-	return (point.x == s.leftSE.point.x && point.y == s.leftSE.point.y) ||
-		(point.x == s.rightSE.point.x && point.y == s.rightSE.point.y)
+	// return (point.x == s.leftSE.point.x && point.y == s.leftSE.point.y) ||
+	// (point.x == s.rightSE.point.x && point.y == s.rightSE.point.y)
+	return (almostEqual(point.x, s.leftSE.point.x) && almostEqual(point.y, s.leftSE.point.y)) ||
+		(almostEqual(point.x, s.rightSE.point.x) && almostEqual(point.y, s.rightSE.point.y))
 }
 
 func (s *segment) comparePoint(point *point) int {
@@ -294,37 +324,23 @@ func (s *segment) comparePoint(point *point) int {
 	v := s.vector()
 
 	// Exactly vertical segments.
-	if lPt.x == rPt.x {
-		if point.x == lPt.x {
-			return 0
-		}
-		if point.x < lPt.x {
-			return 1
-		}
-		return -1
+	if almostEqual(lPt.x, rPt.x) {
+		return flpCmp(point.x, lPt.x)
 	}
 
 	// Nearly vertical segments with an intersection.
 	// Check to see where a point on the line with matching Y coordinate is.
-
 	yDist := (point.y - lPt.y) / v[1]
 	xFromYDist := lPt.x + yDist*v[0]
-	if point.x == xFromYDist {
+	if almostEqual(point.x, xFromYDist) {
 		return 0
 	}
 
 	// General case.
 	// Check to see where a point on the line with matching X coordinate is.
-
 	xDist := (point.x - lPt.x) / v[0]
 	yFromXDist := lPt.y + xDist*v[1]
-	if point.y == yFromXDist {
-		return 0
-	}
-	if point.y < yFromXDist {
-		return -1
-	}
-	return 1
+	return flpCmp(point.y, yFromXDist)
 }
 
 func (s *segment) getIntersection(other *segment) *point {

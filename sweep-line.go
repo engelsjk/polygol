@@ -55,17 +55,48 @@ func (sl *sweepLine) process(event *sweepEvent) ([]*sweepEvent, error) {
 
 	var node *splaytree.Node
 	if event.isLeft {
+		/////////////////////////////////////////////////
+		// debug
+		if seg.id == 1038 {
+			fmt.Println("#############################################")
+			fmt.Println("#############################################")
+			fmt.Printf("event: %p %+v\n", event, event)
+			fmt.Printf("segment: %p %+v %f,%f ==> %f,%f\n",
+				seg, seg,
+				seg.leftSE.point.x, seg.leftSE.point.y,
+				seg.rightSE.point.x, seg.rightSE.point.y,
+			)
+			fmt.Printf("node: %p %+v\n", node, node)
+			for i, item := range sl.tree.Items() {
+				seg := item.(*segment)
+				fmt.Printf("segment[%d]: %p %+v %f,%f ==> %f,%f\n",
+					i, seg, seg,
+					seg.leftSE.point.x, seg.leftSE.point.y,
+					seg.rightSE.point.x, seg.rightSE.point.y,
+				)
+			}
+			for i, node := range sl.tree.Nodes() {
+				fmt.Printf("node[%d]: %p %+v\n",
+					i, node, node,
+				)
+			}
+			fmt.Println("contain")
+			fmt.Printf("tree contains segment: %t\n", sl.tree.Contains(seg))
+			fmt.Println("contain done")
+			fmt.Println("#############################################")
+			fmt.Println("#############################################")
+		}
+		/////////////////////////////////////////////////
+		fmt.Println("insert")
 		node = sl.tree.Insert(seg)
+		fmt.Println("insert done")
 	} else {
+		fmt.Println("find")
 		node = sl.tree.Find(seg)
+		fmt.Println("find done")
 	}
 
 	if node == nil {
-
-		fmt.Printf("event: %+v\n", event)
-		fmt.Printf("segment: %+v\n", seg)
-		fmt.Printf("node: %+v\n", node)
-
 		return nil, fmt.Errorf(
 			`Unable to find segment #%d [%f, %f] -> [%f, %f] in SweepLine tree. 
 			Please submit a bug report.`,
@@ -74,6 +105,8 @@ func (sl *sweepLine) process(event *sweepEvent) ([]*sweepEvent, error) {
 			seg.rightSE.point.x, seg.rightSE.point.y,
 		)
 	}
+
+	fmt.Println("continue")
 
 	prevNode := node
 	nextNode := node
