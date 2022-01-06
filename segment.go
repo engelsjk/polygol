@@ -268,7 +268,7 @@ func (s *segment) vector() []float64 {
 	}
 }
 
-func (s *segment) isAndEndpoint(point *point) bool {
+func (s *segment) isAnEndpoint(point *point) bool {
 	if s == nil {
 		return false
 	}
@@ -294,7 +294,7 @@ func (s *segment) isAndEndpoint(point *point) bool {
 
 func (s *segment) comparePoint(point *point) int {
 
-	if s.isAndEndpoint(point) {
+	if s.isAnEndpoint(point) {
 		return 0
 	}
 
@@ -303,25 +303,48 @@ func (s *segment) comparePoint(point *point) int {
 	v := s.vector()
 
 	// Exactly vertical segments.
-	// if almostEqual(lPt.x, rPt.x) {
-	if lPt.x == rPt.x {
+
+	if almostEqual(lPt.x, rPt.x) {
 		return flpCmp(point.x, lPt.x)
 	}
+
+	// if lPt.x == rPt.x {
+	// 	if point.x == lPt.x {
+	// 		return 0
+	// 	}
+	// 	if point.x < lPt.x {
+	// 		return 1
+	// 	}
+	// 	return -1
+	// }
 
 	// Nearly vertical segments with an intersection.
 	// Check to see where a point on the line with matching Y coordinate is.
 	yDist := (point.y - lPt.y) / v[1]
 	xFromYDist := lPt.x + yDist*v[0]
-	// if almostEqual(point.x, xFromYDist) {
-	if point.x == xFromYDist {
+
+	if almostEqual(point.x, xFromYDist) {
 		return 0
 	}
+
+	// if point.x == xFromYDist {
+	// 	return 0
+	// }
 
 	// General case.
 	// Check to see where a point on the line with matching X coordinate is.
 	xDist := (point.x - lPt.x) / v[0]
 	yFromXDist := lPt.y + xDist*v[1]
+
 	return flpCmp(point.y, yFromXDist)
+
+	// if point.y == yFromXDist {
+	// 	return 0
+	// }
+	// if point.y < yFromXDist {
+	// 	return -1
+	// }
+	// return 1
 }
 
 func (s *segment) getIntersection(other *segment) *point {

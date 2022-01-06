@@ -305,12 +305,12 @@ func TestSegmentIsAnEndpoint(t *testing.T) {
 	terr(t, err)
 
 	// yup
-	expect(t, seg.isAndEndpoint(p1))
-	expect(t, seg.isAndEndpoint(p2))
+	expect(t, seg.isAnEndpoint(p1))
+	expect(t, seg.isAnEndpoint(p2))
 
 	// nope
-	expect(t, !seg.isAndEndpoint(&point{x: -34, y: 46}))
-	expect(t, !seg.isAndEndpoint(&point{x: 0, y: 0}))
+	expect(t, !seg.isAnEndpoint(&point{x: -34, y: 46}))
+	expect(t, !seg.isAnEndpoint(&point{x: 0, y: 0}))
 }
 func TestSegmentComparisonWithPoint(t *testing.T) {
 	var seg *segment
@@ -319,154 +319,175 @@ func TestSegmentComparisonWithPoint(t *testing.T) {
 
 	op := newOperation("")
 
-	seg1, err := op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
-	terr(t, err)
+	t.Run("general", func(t *testing.T) {
+		seg1, err := op.newSegmentFromRing(&point{x: 0, y: 0}, &point{x: 1, y: 1}, nil)
+		terr(t, err)
 
-	seg2, err := op.newSegmentFromRing(&point{x: 0, y: 1}, &point{x: 0, y: 0}, nil)
-	terr(t, err)
+		seg2, err := op.newSegmentFromRing(&point{x: 0, y: 1}, &point{x: 0, y: 0}, nil)
+		terr(t, err)
 
-	expect(t, seg1.comparePoint(&point{x: 0, y: 1}) == 1)
-	expect(t, seg1.comparePoint(&point{x: 1, y: 2}) == 1)
-	expect(t, seg1.comparePoint(&point{x: 0, y: 0}) == 0)
-	expect(t, seg1.comparePoint(&point{x: 5, y: -1}) == -1)
+		expect(t, seg1.comparePoint(&point{x: 0, y: 1}) == 1)
+		expect(t, seg1.comparePoint(&point{x: 1, y: 2}) == 1)
+		expect(t, seg1.comparePoint(&point{x: 0, y: 0}) == 0)
+		expect(t, seg1.comparePoint(&point{x: 5, y: -1}) == -1)
 
-	expect(t, seg2.comparePoint(&point{x: 0, y: 1}) == 0)
-	expect(t, seg2.comparePoint(&point{x: 1, y: 2}) == -1)
-	expect(t, seg2.comparePoint(&point{x: 0, y: 0}) == 0)
-	expect(t, seg2.comparePoint(&point{x: 5, y: -1}) == -1)
+		expect(t, seg2.comparePoint(&point{x: 0, y: 1}) == 0)
+		expect(t, seg2.comparePoint(&point{x: 1, y: 2}) == -1)
+		expect(t, seg2.comparePoint(&point{x: 0, y: 0}) == 0)
+		expect(t, seg2.comparePoint(&point{x: 5, y: -1}) == -1)
+	})
 
 	// barely above
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
-	terr(t, err)
-
-	pt = &point{x: 2, y: 1 + epsilon*3/2}
-	expect(t, seg.comparePoint(pt) == 1)
+	t.Run("barely-above", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
+		terr(t, err)
+		pt = &point{x: 2, y: 1 + epsilon*3/2}
+		expect(t, seg.comparePoint(pt) == 1)
+	})
 
 	// vertical before
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 1, y: 3}, nil)
-	terr(t, err)
-
-	pt = &point{x: 0, y: 0}
-	expect(t, seg.comparePoint(pt) == 1)
+	t.Run("vertical-before", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 1, y: 3}, nil)
+		terr(t, err)
+		pt = &point{x: 0, y: 0}
+		expect(t, seg.comparePoint(pt) == 1)
+	})
 
 	// vertical after
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 1, y: 3}, nil)
-	terr(t, err)
-
-	pt = &point{x: 2, y: 0}
-	expect(t, seg.comparePoint(pt) == -1)
+	t.Run("vertical-after", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 1, y: 3}, nil)
+		terr(t, err)
+		pt = &point{x: 2, y: 0}
+		expect(t, seg.comparePoint(pt) == -1)
+	})
 
 	// vertical on
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 1, y: 3}, nil)
-	terr(t, err)
-
-	pt = &point{x: 1, y: 0}
-	expect(t, seg.comparePoint(pt) == 0)
+	t.Run("vertical-on", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 1, y: 3}, nil)
+		terr(t, err)
+		pt = &point{x: 1, y: 0}
+		expect(t, seg.comparePoint(pt) == 0)
+	})
 
 	// horizontal below
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
-	terr(t, err)
-
-	pt = &point{x: 0, y: 0}
-	expect(t, seg.comparePoint(pt) == -1)
+	t.Run("horizontal-below", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
+		terr(t, err)
+		pt = &point{x: 0, y: 0}
+		expect(t, seg.comparePoint(pt) == -1)
+	})
 
 	// horizontal above
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
-	terr(t, err)
-
-	pt = &point{x: 0, y: 2}
-	expect(t, seg.comparePoint(pt) == 1)
+	t.Run("horizontal-above", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
+		terr(t, err)
+		pt = &point{x: 0, y: 2}
+		expect(t, seg.comparePoint(pt) == 1)
+	})
 
 	// horizontal on
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
-	terr(t, err)
-
-	pt = &point{x: 0, y: 1}
-	expect(t, seg.comparePoint(pt) == 0)
+	t.Run("horizontal-on", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 1}, nil)
+		terr(t, err)
+		pt = &point{x: 0, y: 1}
+		expect(t, seg.comparePoint(pt) == 0)
+	})
 
 	// in vertical plane below
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
-	terr(t, err)
-
-	pt = &point{x: 2, y: 0}
-	expect(t, seg.comparePoint(pt) == -1)
+	t.Run("in-vertical-plane-below", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
+		terr(t, err)
+		pt = &point{x: 2, y: 0}
+		expect(t, seg.comparePoint(pt) == -1)
+	})
 
 	// in vertical plane above
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
-	terr(t, err)
-
-	pt = &point{x: 2, y: 4}
-	expect(t, seg.comparePoint(pt) == 1)
+	t.Run("in-vertical-plane-above", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
+		terr(t, err)
+		pt = &point{x: 2, y: 4}
+		expect(t, seg.comparePoint(pt) == 1)
+	})
 
 	// in horizontal plane upward sloping before
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
-	terr(t, err)
-
-	pt = &point{x: 0, y: 2}
-	expect(t, seg.comparePoint(pt) == 1)
+	t.Run("in-horizontal-plane-upward-sloping-before", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
+		terr(t, err)
+		pt = &point{x: 0, y: 2}
+		expect(t, seg.comparePoint(pt) == 1)
+	})
 
 	// in horizontal plane upward sloping after
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
-	terr(t, err)
-
-	pt = &point{x: 4, y: 2}
-	expect(t, seg.comparePoint(pt) == -1)
+	t.Run("in-horizontal-plane-upward-sloping-after", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 3}, nil)
+		terr(t, err)
+		pt = &point{x: 4, y: 2}
+		expect(t, seg.comparePoint(pt) == -1)
+	})
 
 	// in horizontal plane downward sloping below
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 3}, &point{x: 3, y: 1}, nil)
-	terr(t, err)
-
-	pt = &point{x: 0, y: 2}
-	expect(t, seg.comparePoint(pt) == -1)
+	t.Run("in-horizontal-plane-downward-sloping-below", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 3}, &point{x: 3, y: 1}, nil)
+		terr(t, err)
+		pt = &point{x: 0, y: 2}
+		expect(t, seg.comparePoint(pt) == -1)
+	})
 
 	// in horizontal plane downward sloping after
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 3}, &point{x: 3, y: 1}, nil)
-	terr(t, err)
-
-	pt = &point{x: 4, y: 2}
-	expect(t, seg.comparePoint(pt) == 1)
+	t.Run("in-horizontal-plane-downward-sloping-after", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 3}, &point{x: 3, y: 1}, nil)
+		terr(t, err)
+		pt = &point{x: 4, y: 2}
+		expect(t, seg.comparePoint(pt) == 1)
+	})
 
 	// upward more vertical before
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 6}, nil)
-	terr(t, err)
-
-	pt = &point{x: 0, y: 2}
-	expect(t, seg.comparePoint(pt) == 1)
+	t.Run("upward-more-vertical-before", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 6}, nil)
+		terr(t, err)
+		pt = &point{x: 0, y: 2}
+		expect(t, seg.comparePoint(pt) == 1)
+	})
 
 	// upward more vertical after
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 6}, nil)
-	terr(t, err)
-
-	pt = &point{x: 4, y: 2}
-	expect(t, seg.comparePoint(pt) == -1)
+	t.Run("upward-more-vertical-after", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 1}, &point{x: 3, y: 6}, nil)
+		terr(t, err)
+		pt = &point{x: 4, y: 2}
+		expect(t, seg.comparePoint(pt) == -1)
+	})
 
 	// downward more vertical before
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 6}, &point{x: 3, y: 1}, nil)
-	terr(t, err)
-
-	pt = &point{x: 0, y: 2}
-	expect(t, seg.comparePoint(pt) == -1)
+	t.Run("downward-more-vertical-before", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 6}, &point{x: 3, y: 1}, nil)
+		terr(t, err)
+		pt = &point{x: 0, y: 2}
+		expect(t, seg.comparePoint(pt) == -1)
+	})
 
 	// downward more vertical after
-	seg, err = op.newSegmentFromRing(&point{x: 1, y: 6}, &point{x: 3, y: 1}, nil)
-	terr(t, err)
+	t.Run("downward-more-vertical-after", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 1, y: 6}, &point{x: 3, y: 1}, nil)
+		terr(t, err)
+		pt = &point{x: 4, y: 2}
+		expect(t, seg.comparePoint(pt) == 1)
+	})
 
-	pt = &point{x: 4, y: 2}
-	expect(t, seg.comparePoint(pt) == 1)
-
-	// downward-slopping segment with almost touching point - from issue 37
-	seg, err = op.newSegmentFromRing(&point{x: 0.523985, y: 51.281651}, &point{x: 0.5241, y: 51.281651000100005}, nil)
-	terr(t, err)
-
-	pt = &point{x: 0.5239850000000027, y: 51.281651000000004}
-	expect(t, seg.comparePoint(pt) == 1)
+	// downward-sloping segment with almost touching point - from issue 37
+	t.Run("downward-sloping-segment-with-almost-touching-point", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: 0.523985, y: 51.281651}, &point{x: 0.5241, y: 51.281651000100005}, nil)
+		terr(t, err)
+		pt = &point{x: 0.5239850000000027, y: 51.281651000000004}
+		expect(t, seg.comparePoint(pt) == 1)
+	})
 
 	// avoid splitting loops on near vertical segments - from issue 60-2
-	seg, err = op.newSegmentFromRing(&point{x: -45.3269382, y: -1.4059341}, &point{x: -45.326737413921656, y: -1.40635}, nil)
-	terr(t, err)
-
-	pt = &point{x: -45.326833968900424, y: -1.40615}
-	expect(t, seg.comparePoint(pt) == 0)
+	t.Run("avoid-splitting-loops-on-near-vertical-segments", func(t *testing.T) {
+		seg, err = op.newSegmentFromRing(&point{x: -45.3269382, y: -1.4059341}, &point{x: -45.326737413921656, y: -1.40635}, nil)
+		terr(t, err)
+		pt = &point{x: -45.326833968900424, y: -1.40615}
+		expect(t, seg.comparePoint(pt) == 0)
+	})
 }
 func TestSegmentgetIntersections2(t *testing.T) {
 	var seg1, seg2, s3 *segment

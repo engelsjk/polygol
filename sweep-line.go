@@ -152,11 +152,11 @@ func (sl *sweepLine) process(event *sweepEvent) ([]*sweepEvent, error) {
 		if prevSeg != nil && nextSeg != nil {
 			inter := prevSeg.getIntersection(nextSeg)
 			if inter != nil {
-				if !prevSeg.isAndEndpoint(inter) {
+				if !prevSeg.isAnEndpoint(inter) {
 					newEventsFromSplit := sl.splitSafely(prevSeg, inter)
 					newEvents = append(newEvents, newEventsFromSplit...)
 				}
-				if !nextSeg.isAndEndpoint(inter) {
+				if !nextSeg.isAnEndpoint(inter) {
 					newEventsFromSplit := sl.splitSafely(nextSeg, inter)
 					newEvents = append(newEvents, newEventsFromSplit...)
 				}
@@ -198,10 +198,10 @@ func (sl *sweepLine) getSplitterFromIntersections(seg, otherSeg *segment, events
 	var otherSplitter *point
 	otherInter := otherSeg.getIntersection(seg)
 	if otherInter != nil {
-		if !seg.isAndEndpoint(otherInter) {
+		if !seg.isAnEndpoint(otherInter) {
 			otherSplitter = otherInter
 		}
-		if !otherSeg.isAndEndpoint(otherInter) {
+		if !otherSeg.isAnEndpoint(otherInter) {
 			newEventsFromSplit := sl.splitSafely(otherSeg, otherInter)
 			events = append(events, newEventsFromSplit...)
 		}
