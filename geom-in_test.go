@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestRingIn(t *testing.T) {
+func TestGeomInRingIn(t *testing.T) {
 	var ringIn *ringIn
 	var err error
 	var ring [][]float64
@@ -44,7 +44,7 @@ func TestRingIn(t *testing.T) {
 	expect(t, !ringIn.isExterior)
 }
 
-func TestPolyIn(t *testing.T) {
+func TestGeomInPolyIn(t *testing.T) {
 
 	op := newOperation("")
 
@@ -66,7 +66,7 @@ func TestPolyIn(t *testing.T) {
 	expect(t, len(polyIn.getSweepEvents()) == 22)
 }
 
-func TestmultiPolyIn(t *testing.T) {
+func TestGeomInMultiPolyIn(t *testing.T) {
 
 	var multiPolyIn *multiPolyIn
 	var err error
@@ -118,4 +118,55 @@ func TestmultiPolyIn(t *testing.T) {
 		{{{0}, {0, 1}, {1, 0}}},
 	}, false)
 	expect(t, err != nil)
+}
+
+func TestGeomInRingInIndexOf(t *testing.T) {
+	r1 := &ringIn{}
+	r2 := &ringIn{}
+	r3 := &ringIn{}
+	r4 := &ringIn{}
+	r5 := &ringIn{}
+	r6 := &ringIn{}
+
+	ringIns := []*ringIn{r1, r2, r3, r4, r5}
+	expect(t, r1.indexOf(ringIns) == 0)
+	expect(t, r2.indexOf(ringIns) == 1)
+	expect(t, r3.indexOf(ringIns) == 2)
+	expect(t, r4.indexOf(ringIns) == 3)
+	expect(t, r5.indexOf(ringIns) == 4)
+	expect(t, r6.indexOf(ringIns) == -1)
+}
+
+func TestGeomInPolyInIndexOf(t *testing.T) {
+	p1 := &polyIn{}
+	p2 := &polyIn{}
+	p3 := &polyIn{}
+	p4 := &polyIn{}
+	p5 := &polyIn{}
+	p6 := &polyIn{}
+
+	polyIns := []*polyIn{p1, p2, p3, p4, p5}
+	expect(t, p1.indexOf(polyIns) == 0)
+	expect(t, p2.indexOf(polyIns) == 1)
+	expect(t, p3.indexOf(polyIns) == 2)
+	expect(t, p4.indexOf(polyIns) == 3)
+	expect(t, p5.indexOf(polyIns) == 4)
+	expect(t, p6.indexOf(polyIns) == -1)
+}
+
+func TestGeomInMultiPolyInIndexOf(t *testing.T) {
+	mp1 := &multiPolyIn{}
+	mp2 := &multiPolyIn{}
+	mp3 := &multiPolyIn{}
+	mp4 := &multiPolyIn{}
+	mp5 := &multiPolyIn{}
+	mp6 := &multiPolyIn{}
+
+	multiPolyIns := []*multiPolyIn{mp1, mp2, mp3, mp4, mp5}
+	expect(t, mp1.indexOf(multiPolyIns) == 0)
+	expect(t, mp2.indexOf(multiPolyIns) == 1)
+	expect(t, mp3.indexOf(multiPolyIns) == 2)
+	expect(t, mp4.indexOf(multiPolyIns) == 3)
+	expect(t, mp5.indexOf(multiPolyIns) == 4)
+	expect(t, mp6.indexOf(multiPolyIns) == -1)
 }

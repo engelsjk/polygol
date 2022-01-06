@@ -38,7 +38,9 @@ func newRingOutFromSegments(allSegments []*segment) ([]*ringOut, error) {
 	ringsOut := []*ringOut{}
 
 	for i := 0; i < len(allSegments); i++ {
+
 		segment := allSegments[i]
+
 		if !segment.isInResult() || segment.ringOut != nil {
 			continue
 		}
@@ -347,5 +349,3 @@ func (mpo *multiPolyOut) composePolys(rings []*ringOut) []*polyOut {
 	}
 	return polys
 }
-
-//////////////

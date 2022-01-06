@@ -55,45 +55,9 @@ func (sl *sweepLine) process(event *sweepEvent) ([]*sweepEvent, error) {
 
 	var node *splaytree.Node
 	if event.isLeft {
-		/////////////////////////////////////////////////
-		// debug
-		if seg.id == 1038 {
-			fmt.Println("#############################################")
-			fmt.Println("#############################################")
-			fmt.Printf("event: %p %+v\n", event, event)
-			fmt.Printf("segment: %p %+v %f,%f ==> %f,%f\n",
-				seg, seg,
-				seg.leftSE.point.x, seg.leftSE.point.y,
-				seg.rightSE.point.x, seg.rightSE.point.y,
-			)
-			fmt.Printf("node: %p %+v\n", node, node)
-			for i, item := range sl.tree.Items() {
-				seg := item.(*segment)
-				fmt.Printf("segment[%d]: %p %+v %f,%f ==> %f,%f\n",
-					i, seg, seg,
-					seg.leftSE.point.x, seg.leftSE.point.y,
-					seg.rightSE.point.x, seg.rightSE.point.y,
-				)
-			}
-			for i, node := range sl.tree.Nodes() {
-				fmt.Printf("node[%d]: %p %+v\n",
-					i, node, node,
-				)
-			}
-			fmt.Println("contain")
-			fmt.Printf("tree contains segment: %t\n", sl.tree.Contains(seg))
-			fmt.Println("contain done")
-			fmt.Println("#############################################")
-			fmt.Println("#############################################")
-		}
-		/////////////////////////////////////////////////
-		fmt.Println("insert")
 		node = sl.tree.Insert(seg)
-		fmt.Println("insert done")
 	} else {
-		fmt.Println("find")
 		node = sl.tree.Find(seg)
-		fmt.Println("find done")
 	}
 
 	if node == nil {
@@ -106,8 +70,6 @@ func (sl *sweepLine) process(event *sweepEvent) ([]*sweepEvent, error) {
 		)
 	}
 
-	fmt.Println("continue")
-
 	prevNode := node
 	nextNode := node
 	var prevSeg *segment
@@ -117,6 +79,7 @@ func (sl *sweepLine) process(event *sweepEvent) ([]*sweepEvent, error) {
 	for prevSeg == nil {
 		prevNode = sl.tree.Prev(prevNode)
 		if prevNode == nil {
+			prevSeg = nil
 			break
 		} else if prevNode.Item().(*segment).consumedBy == nil {
 			prevSeg = prevNode.Item().(*segment)
@@ -184,20 +147,24 @@ func (sl *sweepLine) process(event *sweepEvent) ([]*sweepEvent, error) {
 		}
 	} else {
 		// event.isRight
-
 		// since we're about to be removed from the sweep line, check for
 		// intersections between our previous and next segments
-
 		if prevSeg != nil && nextSeg != nil {
 			inter := prevSeg.getIntersection(nextSeg)
 			if inter != nil {
-				newEvents = sl.splitOnInter(prevSeg, inter, newEvents)
-				newEvents = sl.splitOnInter(nextSeg, inter, newEvents)
+				if !prevSeg.isAndEndpoint(inter) {
+					newEventsFromSplit := sl.splitSafely(prevSeg, inter)
+					newEvents = append(newEvents, newEventsFromSplit...)
+				}
+				if !nextSeg.isAndEndpoint(inter) {
+					newEventsFromSplit := sl.splitSafely(nextSeg, inter)
+					newEvents = append(newEvents, newEventsFromSplit...)
+				}
 			}
 		}
+
 		sl.tree.Remove(seg)
 	}
-
 	return newEvents, nil
 }
 
@@ -208,11 +175,15 @@ func (sl *sweepLine) splitSafely(segment *segment, point *point) []*sweepEvent {
 	// so remove affected segments and right sweep events before splitting
 	// removeNode() doesn't work, so have re-find the seg
 	// https://github.com/w8r/splay-tree/pull/5
+
 	sl.tree.Remove(segment)
+
 	rightSE := segment.rightSE
 	sl.queue.Remove(rightSE)
+
 	newEvents := segment.split(point)
 	newEvents = append(newEvents, rightSE)
+
 	// splitting can trigger consumption
 	if segment.consumedBy == nil {
 		sl.tree.Insert(segment)
@@ -220,32 +191,20 @@ func (sl *sweepLine) splitSafely(segment *segment, point *point) []*sweepEvent {
 	return newEvents
 }
 
-func (sl *sweepLine) getSplitterFromIntersections(seg, other *segment, events []*sweepEvent) (*point, []*sweepEvent) {
-
-	var splitter *point
-	if other != nil {
-		otherInter := other.getIntersection(seg)
-		if otherInter != nil {
-			if !seg.isAndEndpoint(otherInter) {
-				splitter = otherInter
-			}
-			if !other.isAndEndpoint(otherInter) {
-				newEventsFromSplit := sl.splitSafely(other, otherInter)
-				for i := 0; i < len(newEventsFromSplit); i++ {
-					events = append(events, newEventsFromSplit[i])
-				}
-			}
+func (sl *sweepLine) getSplitterFromIntersections(seg, otherSeg *segment, events []*sweepEvent) (*point, []*sweepEvent) {
+	if otherSeg == nil {
+		return nil, events
+	}
+	var otherSplitter *point
+	otherInter := otherSeg.getIntersection(seg)
+	if otherInter != nil {
+		if !seg.isAndEndpoint(otherInter) {
+			otherSplitter = otherInter
+		}
+		if !otherSeg.isAndEndpoint(otherInter) {
+			newEventsFromSplit := sl.splitSafely(otherSeg, otherInter)
+			events = append(events, newEventsFromSplit...)
 		}
 	}
-	return splitter, events
-}
-
-func (sl *sweepLine) splitOnInter(seg *segment, inter *point, events []*sweepEvent) []*sweepEvent {
-	if !seg.isAndEndpoint(inter) {
-		newEventsFromSplit := sl.splitSafely(seg, inter)
-		for i := 0; i < len(newEventsFromSplit); i++ {
-			events = append(events, newEventsFromSplit[i])
-		}
-	}
-	return events
+	return otherSplitter, events
 }

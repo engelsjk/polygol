@@ -40,7 +40,7 @@ func equalVector(v1, v2 []float64) bool {
 	return true
 }
 
-func TestnewSegment(t *testing.T) {
+func TestSegmentNew(t *testing.T) {
 
 	var leftSE, rightSE *sweepEvent
 
@@ -71,7 +71,7 @@ func TestnewSegment(t *testing.T) {
 	expect(t, seg2.id-seg1.id == 1)
 }
 
-func TestnewSegmentFromRing(t *testing.T) {
+func TestSegmentNewFromRing(t *testing.T) {
 	var p1, p2 *point
 	var seg *segment
 	var err error

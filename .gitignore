@@ -1,2 +1,4 @@
 notes.txt
-debug/
+test/debug/
+debug.go
+debug_test.go

@@ -26,6 +26,7 @@ func newSweepEvent(point *point, isLeft bool) *sweepEvent {
 	}
 	se.point = point
 	se.isLeft = isLeft
+
 	return se
 }
 
@@ -61,39 +62,29 @@ func sweepEventCompare(a, b interface{}) int {
 }
 
 func sweepEventComparePoints(aPt, bPt *point) int {
-	if aPt.x < bPt.x {
-		return -1
+	cmpX := flpCmp(aPt.x, bPt.x)
+	if cmpX != 0 {
+		return cmpX
 	}
-	if aPt.x > bPt.x {
-		return 1
-	}
-
-	if aPt.y < bPt.y {
-		return -1
-	}
-	if aPt.y > bPt.y {
-		return 1
-	}
-	return 0
+	return flpCmp(aPt.y, bPt.y)
 }
 
 func (se *sweepEvent) link(other *sweepEvent) error {
-
 	if other.point == se.point {
 		return errors.New("Tried to link already linked events.")
 	}
-
 	otherEvents := other.point.events
 	for i := 0; i < len(otherEvents); i++ {
 		evt := otherEvents[i]
 		se.point.events = append(se.point.events, evt)
 		evt.point = se.point
 	}
-
 	se.checkForConsuming()
 	return nil
 }
 
+// Do a pass over our linked events and check to see if any pair
+// of segments match, and should be consumed.
 func (se *sweepEvent) checkForConsuming() {
 	// TODO: The loops in this method run O(n^2) => no good.
 	//        Maintain little ordered sweep event trees?
@@ -114,7 +105,9 @@ func (se *sweepEvent) checkForConsuming() {
 			if evt2.segment.consumedBy != nil {
 				continue
 			}
-			if &(evt1.otherSE.point.events) != &(evt2.otherSE.point.events) {
+
+			if !equalSweepEvents(evt1.otherSE.point.events, evt2.otherSE.point.events) { // more correct? or not
+				// if &(evt1.otherSE.point.events) != &(evt2.otherSE.point.events) {
 				continue
 			}
 			evt1.segment.consume(evt2.segment)
@@ -123,7 +116,6 @@ func (se *sweepEvent) checkForConsuming() {
 }
 
 func (se *sweepEvent) getAvailableLinkedEvents() []*sweepEvent {
-
 	// point.events is always of length 2 or greater
 	events := []*sweepEvent{}
 	for i := 0; i < len(se.point.events); i++ {

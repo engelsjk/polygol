@@ -4,6 +4,7 @@ import "math"
 
 const (
 	epsilon = float64(7.)/3 - float64(4.)/3 - float64(1.)
+	// epsilon = 2e-12
 )
 
 var (
