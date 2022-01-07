@@ -31,6 +31,8 @@ Each Boolean operation (union, intersection, difference and XOR) takes in one su
 func polygol.Union(geom polygol.Geom, moreGeoms ...polygol.Geom) (polygol.Geom, error)
 ```
 
+Note that particularly large geometries may cause errors that will suggest increasing environment variables POLYGOL_MAX_QUEUE_SIZE and POLYGOL_MAX_SWEEPLINE_SEGMENTS.
+
 ## Examples
 
 The [examples](https://github.com/engelsjk/polygol/tree/main/examples) page includes some information on how ```polygol``` can interface with Go geometry libraries like [paulmach/go.geojson](https://github.com/paulmach/go.geojson), [paulmach/orb](https://github.com/paulmach/orb) and [twpayne/go-geom](https://github.com/twpayne/go-geom).

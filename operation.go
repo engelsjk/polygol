@@ -14,19 +14,23 @@ var (
 )
 
 func init() {
+
+	// max queue size
 	envMaxQueueSize := os.Getenv("POLYGOL_MAX_QUEUE_SIZE")
 	if envMaxQueueSize != "" {
 		maxQueueSize, err := strconv.Atoi(envMaxQueueSize)
 		if err != nil {
-			fmt.Println("env var POLYGOL_MAX_QUEUE_SIZE must be a integer")
+			fmt.Println("env var POLYGOL_MAX_QUEUE_SIZE must be an integer")
 		}
 		polygolClippingMaxQueueSize = maxQueueSize
 	}
+
+	// max sweepline segments
 	envMaxSweepLineSegments := os.Getenv("POLYGOL_MAX_SWEEPLINE_SEGMENTS")
 	if envMaxSweepLineSegments != "" {
 		maxSweepLineSegments, err := strconv.Atoi(envMaxSweepLineSegments)
 		if err != nil {
-			fmt.Println("env var POLYGOL_MAX_SWEEPLINE_SEGMENTS must be a integer")
+			fmt.Println("env var POLYGOL_MAX_SWEEPLINE_SEGMENTS must be an integer")
 		}
 		polygolClippingMaxSweepLineSegments = maxSweepLineSegments
 	}
