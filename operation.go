@@ -2,14 +2,35 @@ package polygol
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 
 	splaytree "github.com/engelsjk/splay-tree"
 )
 
-const (
-	polygonClippingMaxQueueSize         = 1000000
-	polygonClippingMaxSweepLineSegments = 1000000
+var (
+	polygolClippingMaxQueueSize         = 1000000
+	polygolClippingMaxSweepLineSegments = 1000000
 )
+
+func init() {
+	envMaxQueueSize := os.Getenv("POLYGOL_MAX_QUEUE_SIZE")
+	if envMaxQueueSize != "" {
+		maxQueueSize, err := strconv.Atoi(envMaxQueueSize)
+		if err != nil {
+			fmt.Println("env var POLYGOL_MAX_QUEUE_SIZE must be a integer")
+		}
+		polygolClippingMaxQueueSize = maxQueueSize
+	}
+	envMaxSweepLineSegments := os.Getenv("POLYGOL_MAX_SWEEPLINE_SEGMENTS")
+	if envMaxSweepLineSegments != "" {
+		maxSweepLineSegments, err := strconv.Atoi(envMaxSweepLineSegments)
+		if err != nil {
+			fmt.Println("env var POLYGOL_MAX_SWEEPLINE_SEGMENTS must be a integer")
+		}
+		polygolClippingMaxSweepLineSegments = maxSweepLineSegments
+	}
+}
 
 type operation struct {
 	rounder       *ptRounder
@@ -75,10 +96,10 @@ func (o *operation) run(geom Geom, moreGeoms ...Geom) (Geom, error) {
 		sweepEvents := multiPolys[i].getSweepEvents()
 		for j := 0; j < len(sweepEvents); j++ {
 			queue.Insert(sweepEvents[j])
-			if queue.Size() > polygonClippingMaxQueueSize {
+			if queue.Size() > polygolClippingMaxQueueSize {
 				// prevents an infinite loop, an otherwise common manifestation of bugs
 				return nil, fmt.Errorf(`Infinite loop when putting segment endpoints in a priority queue 
-				(queue size too big). Please file a bug report.`)
+				(queue size too big). Try increasing POLYGOL_MAX_QUEUE_SIZE.`)
 			}
 		}
 	}
@@ -111,16 +132,16 @@ func (o *operation) run(geom Geom, moreGeoms ...Geom) (Geom, error) {
 				seg.rightSE.point.x, seg.rightSE.point.y)
 		}
 
-		if queue.Size() > polygonClippingMaxQueueSize {
+		if queue.Size() > polygolClippingMaxQueueSize {
 			// prevents an infinite loop, an otherwise common manifestation of bugs
 			return nil, fmt.Errorf(`Infinite loop when passing sweep line over endspoints
-			(queue size too big). Please file a bug report.`)
+			(queue size too big). Try increasing POLYGOL_MAX_QUEUE_SIZE.`)
 		}
 
-		if len(sweepLine.segments) > polygonClippingMaxSweepLineSegments {
+		if len(sweepLine.segments) > polygolClippingMaxSweepLineSegments {
 			// prevents an infinite loop, an otherwise common manifestation of bugs
 			return nil, fmt.Errorf(`Infinite loop when passing sweep line over endspoints
-			(too many sweep line segments). Please file a bug report.`)
+			(too many sweep line segments). Try increasing POLYGOL_MAX_SWEEPLINE_SEGMENTS.`)
 		}
 
 		newEvents, err := sweepLine.process(evt)
