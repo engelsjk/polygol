@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	endToEndDir = "test/end-to-end"
+	endToEndDir = "testdata/end-to-end"
 )
 
 var (
