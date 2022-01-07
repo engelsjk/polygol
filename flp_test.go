@@ -2,7 +2,7 @@ package polygol
 
 import "testing"
 
-func TestCompare(t *testing.T) {
+func TestFlpCompare(t *testing.T) {
 	var a, b float64
 
 	// exactly equal

@@ -211,7 +211,6 @@ func segmentCompare(a, b interface{}) int {
 }
 
 func (o *operation) newSegmentFromRing(pt1, pt2 *point, ring *ringIn) (*segment, error) {
-
 	var leftPt, rightPt *point
 	var winding int
 
@@ -269,23 +268,33 @@ func (s *segment) vector() []float64 {
 	}
 }
 
-func (s *segment) isAndEndpoint(point *point) bool {
+func (s *segment) isAnEndpoint(point *point) bool {
 	if s == nil {
 		return false
 	}
 	if point == nil {
 		return false
 	}
-	if s.leftSE == nil {
-		return false
-	}
 	return (point.x == s.leftSE.point.x && point.y == s.leftSE.point.y) ||
 		(point.x == s.rightSE.point.x && point.y == s.rightSE.point.y)
+	// if s.leftSE != nil {
+	// 	// if almostEqual(point.x, s.leftSE.point.x) && almostEqual(point.y, s.leftSE.point.y) {
+	// 	if point.x == s.leftSE.point.x && point.y == s.leftSE.point.y {
+	// 		return true
+	// 	}
+	// }
+	// if s.rightSE != nil {
+	// 	// if almostEqual(point.x, s.rightSE.point.x) && almostEqual(point.y, s.rightSE.point.y) {
+	// 	if point.x == s.rightSE.point.x && point.y == s.rightSE.point.y {
+	// 		return true
+	// 	}
+	// }
+	// return false
 }
 
 func (s *segment) comparePoint(point *point) int {
 
-	if s.isAndEndpoint(point) {
+	if s.isAnEndpoint(point) {
 		return 0
 	}
 
@@ -294,53 +303,64 @@ func (s *segment) comparePoint(point *point) int {
 	v := s.vector()
 
 	// Exactly vertical segments.
-	if lPt.x == rPt.x {
-		if point.x == lPt.x {
-			return 0
-		}
-		if point.x < lPt.x {
-			return 1
-		}
-		return -1
+
+	if almostEqual(lPt.x, rPt.x) {
+		return flpCmp(point.x, lPt.x)
 	}
+
+	// original implementation
+	// if lPt.x == rPt.x {
+	// 	if point.x == lPt.x {
+	// 		return 0
+	// 	}
+	// 	if point.x < lPt.x {
+	// 		return 1
+	// 	}
+	// 	return -1
+	// }
 
 	// Nearly vertical segments with an intersection.
 	// Check to see where a point on the line with matching Y coordinate is.
-
 	yDist := (point.y - lPt.y) / v[1]
 	xFromYDist := lPt.x + yDist*v[0]
-	if point.x == xFromYDist {
+
+	if almostEqual(point.x, xFromYDist) {
 		return 0
 	}
+
+	// original implementation
+	// if point.x == xFromYDist {
+	// 	return 0
+	// }
 
 	// General case.
 	// Check to see where a point on the line with matching X coordinate is.
-
 	xDist := (point.x - lPt.x) / v[0]
 	yFromXDist := lPt.y + xDist*v[1]
-	if point.y == yFromXDist {
-		return 0
-	}
-	if point.y < yFromXDist {
-		return -1
-	}
-	return 1
+
+	return flpCmp(point.y, yFromXDist)
+
+	// original implementation
+	// if point.y == yFromXDist {
+	// 	return 0
+	// }
+	// if point.y < yFromXDist {
+	// 	return -1
+	// }
+	// return 1
 }
 
 func (s *segment) getIntersection(other *segment) *point {
 
-	if s == nil {
-		return nil
-	}
-	if other == nil {
+	if s == nil || other == nil {
 		return nil
 	}
 
 	// If bboxes don't overlap, there can't be any intersections
-	tBbox := s.bbox()
-	oBbox := other.bbox()
+	segBbox := s.bbox()
+	otherBbox := other.bbox()
 
-	bboxOverlap := tBbox.getBboxOverlap(oBbox)
+	bboxOverlap := segBbox.getBboxOverlap(otherBbox)
 	if bboxOverlap == nil {
 		return nil
 	}
@@ -357,10 +377,10 @@ func (s *segment) getIntersection(other *segment) *point {
 	// does each endpoint touch the other segment?
 	// note that we restrict the 'touching' definition to only allow segments
 	// to touch endpoints that lie forward from where we are in the sweep line pass
-	touchesOtherLSE := tBbox.isInBbox(*olp) && s.comparePoint(olp) == 0
-	touchesThisLSE := oBbox.isInBbox(*tlp) && other.comparePoint(tlp) == 0
-	touchesOtherRSE := tBbox.isInBbox(*orp) && s.comparePoint(orp) == 0
-	touchesThisRSE := oBbox.isInBbox(*trp) && other.comparePoint(trp) == 0
+	touchesOtherLSE := segBbox.isInBbox(*olp) && s.comparePoint(olp) == 0
+	touchesThisLSE := otherBbox.isInBbox(*tlp) && other.comparePoint(tlp) == 0
+	touchesOtherRSE := segBbox.isInBbox(*orp) && s.comparePoint(orp) == 0
+	touchesThisRSE := otherBbox.isInBbox(*trp) && other.comparePoint(trp) == 0
 
 	// do left endpoints match?
 	if touchesThisLSE && touchesOtherLSE {
@@ -534,9 +554,7 @@ func (s *segment) split(point *point) []*sweepEvent {
 }
 
 func (s *segment) swapEvents() {
-	tmpEvt := s.rightSE
-	s.rightSE = s.leftSE
-	s.leftSE = tmpEvt
+	s.rightSE, s.leftSE = s.leftSE, s.rightSE
 	s.leftSE.isLeft = true
 	s.rightSE.isLeft = false
 	for i := 0; i < len(s.windings); i++ {
@@ -544,10 +562,9 @@ func (s *segment) swapEvents() {
 	}
 }
 
-func (s *segment) consume(other *segment) {
-
+func (s *segment) consume(otherSeg *segment) {
 	consumer := s
-	consumee := other
+	consumee := otherSeg
 
 	for consumer.consumedBy != nil {
 		consumer = consumer.consumedBy
@@ -564,16 +581,12 @@ func (s *segment) consume(other *segment) {
 	// the winner of the consumption is the earlier segment
 	// according to sweep line ordering
 	if cmp > 0 {
-		tmp := consumer
-		consumer = consumee
-		consumee = tmp
+		consumer, consumee = consumee, consumer
 	}
 
 	// make sure a segment doesn't consume its prev
 	if consumer.prev == consumee {
-		tmp := consumer
-		consumer = consumee
-		consumee = tmp
+		consumer, consumee = consumee, consumer
 	}
 
 	for i := 0; i < len(consumee.rings); i++ {
@@ -617,7 +630,6 @@ type state struct {
 }
 
 func (s *segment) beforeState() *state {
-
 	if s.before != nil {
 		return s.before
 	}
@@ -638,7 +650,6 @@ func (s *segment) beforeState() *state {
 }
 
 func (s *segment) afterState() *state {
-
 	if s.after != nil {
 		return s.after
 	}
@@ -690,7 +701,7 @@ func (s *segment) afterState() *state {
 			}
 			index := ring.poly.indexOf(polysAfter)
 			if index != -1 {
-				polysAfter = append(polysAfter[:index], polysAfter[index+1:]...) // splice
+				polysAfter = append(polysAfter[:index], polysAfter[index+1:]...) // splice(index,1)
 			}
 		}
 	}
@@ -732,7 +743,6 @@ func (s *segment) isInResult() bool {
 		noBefores := len(mpsBefore) == 0
 		noAfters := len(mpsAfter) == 0
 		s.inResult = noBefores != noAfters
-		s.doneInResult = true
 	case "intersection":
 		// INTERSECTION - included iff:
 		//  * on one side of us all multipolys are rep. with poly interiors AND
@@ -747,14 +757,12 @@ func (s *segment) isInResult() bool {
 			most = len(mpsBefore)
 		}
 		s.inResult = most == s.op.numMultiPolys && least < most
-		s.doneInResult = true
 	case "xor":
 		// XOR - included iff:
 		//  * the difference between the number of multipolys represented
 		//    with poly interiors on our two sides is an odd number
 		diff := abs(len(mpsBefore) - len(mpsAfter))
 		s.inResult = diff%2 == 1
-		s.doneInResult = true
 	case "difference":
 		// DIFFERENCE included iff:
 		//  * on exactly one side, we have just the subject
@@ -762,10 +770,10 @@ func (s *segment) isInResult() bool {
 			return len(mps) == 1 && mps[0].isSubject
 		}
 		s.inResult = isJustSubject(mpsBefore) != isJustSubject(mpsAfter)
-		s.doneInResult = true
 	default:
 		fmt.Printf("Unrecognized operation type found %s", s.op.opType)
 	}
+	s.doneInResult = true
 	return s.inResult
 }
 

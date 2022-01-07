@@ -11,6 +11,7 @@ func expect(t testing.TB, what bool) {
 
 func terr(t *testing.T, err error) {
 	if err != nil {
-		t.Error(err)
+		t.Log(err)
+		t.FailNow()
 	}
 }

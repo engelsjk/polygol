@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/engelsjk/polygol/geojson"
+	geojson "github.com/engelsjk/polygol/geojson"
 )
 
 const (
@@ -27,7 +27,7 @@ var (
 	opsSkip     = []string{}
 )
 
-type TestCase struct {
+type testCase struct {
 	Name          string
 	OperationType string
 	ResultPath    string
@@ -52,10 +52,9 @@ func TestEndToEnd(t *testing.T) {
 		}
 
 		targetDir := path.Join(endToEndDir, target.Name())
-
 		argsPath := path.Join(targetDir, "args.geojson")
 
-		args, err := loadGeoms(argsPath, false)
+		args, err := loadGeoms(argsPath)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -65,7 +64,7 @@ func TestEndToEnd(t *testing.T) {
 			log.Fatal(err)
 		}
 
-		testCases := []TestCase{}
+		testCases := []testCase{}
 
 		for _, f := range files {
 			if f.Name() == "args.geojson" {
@@ -79,13 +78,13 @@ func TestEndToEnd(t *testing.T) {
 			opType := strings.TrimSuffix(fn, ext)
 			fp := filepath.Join(targetDir, fn)
 			if opType != "all" {
-				testCases = append(testCases, TestCase{
-					Name:          fmt.Sprintf("%s-all", target.Name()),
+				testCases = append(testCases, testCase{
+					Name:          fmt.Sprintf("%s-%s", target.Name(), opType),
 					OperationType: opType,
 					ResultPath:    fp,
 				})
 			} else {
-				testCases = []TestCase{
+				testCases = []testCase{
 					{
 						Name:          fmt.Sprintf("%s-union", target.Name()),
 						OperationType: "union",
@@ -97,7 +96,7 @@ func TestEndToEnd(t *testing.T) {
 						ResultPath:    fp,
 					},
 					{
-						Name:          fmt.Sprintf("%s-all", target.Name()),
+						Name:          fmt.Sprintf("%s-xor", target.Name()),
 						OperationType: "xor",
 						ResultPath:    fp,
 					},
@@ -119,7 +118,8 @@ func TestEndToEnd(t *testing.T) {
 				if contains(opsSkip, testCase.OperationType) {
 					fmt.Printf("skipping op type %s...\n", testCase.OperationType)
 				}
-				geoms, err := loadGeoms(testCase.ResultPath, true)
+
+				geoms, err := loadGeoms(testCase.ResultPath)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -130,6 +130,7 @@ func TestEndToEnd(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
+
 				expect(t, equalMultiPoly(expected, result))
 			})
 		}
@@ -145,8 +146,9 @@ func contains(s []string, str string) bool {
 	return false
 }
 
-func loadGeoms(filepath string, singleFeature bool) ([]Geom, error) {
+func loadGeoms(filepath string) ([]Geom, error) {
 
+	fmt.Println(filepath)
 	f, err := os.Open(filepath)
 	if err != nil {
 		return nil, err
@@ -158,25 +160,11 @@ func loadGeoms(filepath string, singleFeature bool) ([]Geom, error) {
 		return nil, err
 	}
 
-	var features []*geojson.Feature
+	newFeatures := unmarshalFeatureOrFeatureCollection(b)
 
-	if singleFeature {
-		f, err := geojson.UnmarshalFeature(b)
-		if err != nil {
-			return nil, err
-		}
-		features = append(features, f)
-	} else {
-		fc, err := geojson.UnmarshalFeatureCollection(b)
-		if err != nil {
-			return nil, err
-		}
-		features = append(features, fc.Features...)
-	}
-
-	geoms := make([]Geom, len(features))
-	for i := range features {
-		fg := features[i].Geometry
+	geoms := make([]Geom, len(newFeatures))
+	for i := range newFeatures {
+		fg := newFeatures[i].Geometry
 		switch fg.Type {
 		case "Polygon":
 			geoms[i] = Geom{fg.Polygon}
@@ -188,4 +176,19 @@ func loadGeoms(filepath string, singleFeature bool) ([]Geom, error) {
 	}
 
 	return geoms, nil
+}
+
+func unmarshalFeatureOrFeatureCollection(b []byte) []*geojson.Feature {
+	feature, err := geojson.UnmarshalFeature(b)
+	if err != nil {
+		return nil
+	}
+	if feature.Type != "FeatureCollection" {
+		return []*geojson.Feature{feature}
+	}
+	fc, err := geojson.UnmarshalFeatureCollection(b)
+	if err != nil {
+		return nil
+	}
+	return fc.Features
 }

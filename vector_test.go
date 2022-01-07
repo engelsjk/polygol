@@ -6,18 +6,24 @@ import (
 )
 
 func TestVectorCrossProduct(t *testing.T) {
+	t.Parallel()
+
 	v1 := []float64{1, 2}
 	v2 := []float64{3, 4}
 	expect(t, crossProduct(v1, v2) == -2.0)
 }
 
 func TestVectorDotProduct(t *testing.T) {
+	t.Parallel()
+
 	v1 := []float64{1, 2}
 	v2 := []float64{3, 4}
 	expect(t, dotProduct(v1, v2) == 11.0)
 }
 
 func TestVectorLength(t *testing.T) {
+	t.Parallel()
+
 	var v []float64
 
 	// horizontal
@@ -34,6 +40,8 @@ func TestVectorLength(t *testing.T) {
 }
 
 func TestVectorCompareAngles(t *testing.T) {
+	t.Parallel()
+
 	var pt1, pt2, pt3 []float64
 
 	// colinear
@@ -56,6 +64,8 @@ func TestVectorCompareAngles(t *testing.T) {
 }
 
 func TestVectorSineAndCosineOfAngle(t *testing.T) {
+	t.Parallel()
+
 	var shared, base, angle []float64
 
 	// parallel
@@ -116,6 +126,8 @@ func TestVectorSineAndCosineOfAngle(t *testing.T) {
 }
 
 func TestVectorPerpindicular(t *testing.T) {
+	t.Parallel()
+
 	var v, r []float64
 
 	// vertical
@@ -144,6 +156,8 @@ func TestVectorPerpindicular(t *testing.T) {
 }
 
 func TestVectorClosestPoint(t *testing.T) {
+	t.Parallel()
+
 	var pA1, pA2, pB, cp, expected []float64
 
 	// on line
@@ -209,6 +223,8 @@ func TestVectorClosestPoint(t *testing.T) {
 }
 
 func TestVectorVerticalIntersection(t *testing.T) {
+	t.Parallel()
+
 	var pt, i, v []float64
 	var x float64
 
@@ -244,6 +260,8 @@ func TestVectorVerticalIntersection(t *testing.T) {
 }
 
 func TestVectorHorizontalIntersection(t *testing.T) {
+	t.Parallel()
+
 	var pt, i, v []float64
 	var y float64
 
@@ -279,6 +297,8 @@ func TestVectorHorizontalIntersection(t *testing.T) {
 }
 
 func TestVectorIntersection(t *testing.T) {
+	t.Parallel()
+
 	var i, v1, v2 []float64
 
 	p1 := []float64{42, 42}
