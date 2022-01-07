@@ -308,6 +308,7 @@ func (s *segment) comparePoint(point *point) int {
 		return flpCmp(point.x, lPt.x)
 	}
 
+	// original implementation
 	// if lPt.x == rPt.x {
 	// 	if point.x == lPt.x {
 	// 		return 0
@@ -327,6 +328,7 @@ func (s *segment) comparePoint(point *point) int {
 		return 0
 	}
 
+	// original implementation
 	// if point.x == xFromYDist {
 	// 	return 0
 	// }
@@ -338,6 +340,7 @@ func (s *segment) comparePoint(point *point) int {
 
 	return flpCmp(point.y, yFromXDist)
 
+	// original implementation
 	// if point.y == yFromXDist {
 	// 	return 0
 	// }

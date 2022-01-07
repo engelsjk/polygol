@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	geojson "github.com/paulmach/go.geojson"
+	geojson "github.com/engelsjk/polygol/geojson"
 )
 
 const (
@@ -113,7 +113,7 @@ func TestEndToEnd(t *testing.T) {
 
 			t.Run(testCase.Name, func(t *testing.T) {
 
-				// t.Parallel() // run all end-to-end tests in parallel
+				t.Parallel() // run all end-to-end tests in parallel
 
 				if contains(opsSkip, testCase.OperationType) {
 					fmt.Printf("skipping op type %s...\n", testCase.OperationType)

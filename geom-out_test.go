@@ -54,6 +54,8 @@ func equalRing(r1, r2 [][]float64) bool {
 
 // ring
 func TestGeomOutRingSimpleTriangle(t *testing.T) {
+	t.Parallel()
+
 	// simple triangle
 
 	op := newOperation("")
@@ -79,6 +81,8 @@ func TestGeomOutRingSimpleTriangle(t *testing.T) {
 }
 
 func TestGeomOutRingBowTie(t *testing.T) {
+	t.Parallel()
+
 	// bow tie
 
 	op := newOperation("")
@@ -124,6 +128,8 @@ func TestGeomOutRingBowTie(t *testing.T) {
 }
 
 func TestGeomOutRingRinged(t *testing.T) {
+	t.Parallel()
+
 	// ring ringed
 
 	op := newOperation("")
@@ -173,6 +179,8 @@ func TestGeomOutRingRinged(t *testing.T) {
 }
 
 func TestGeomOutRingRingedInterior(t *testing.T) {
+	t.Parallel()
+
 	// ringed ring interior ring starting point extraneous
 
 	op := newOperation("")
@@ -226,6 +234,8 @@ func TestGeomOutRingRingedInterior(t *testing.T) {
 }
 
 func TestGeomOutRingRingedBowTie(t *testing.T) {
+	t.Parallel()
+
 	// ringed ring and bow tie at same point
 
 	op := newOperation("")
@@ -290,6 +300,8 @@ func TestGeomOutRingRingedBowTie(t *testing.T) {
 }
 
 func TestGeomOutRingDoubleBowTie(t *testing.T) {
+	t.Parallel()
+
 	// double bow tie
 
 	op := newOperation("")
@@ -350,6 +362,8 @@ func TestGeomOutRingDoubleBowTie(t *testing.T) {
 }
 
 func TestGeomOutRingDoubleRinged(t *testing.T) {
+	t.Parallel()
+
 	// double ringed ring
 
 	op := newOperation("")
@@ -410,6 +424,8 @@ func TestGeomOutRingDoubleRinged(t *testing.T) {
 }
 
 func TestGeomOutRingMalformed(t *testing.T) {
+	t.Parallel()
+
 	// errors on on malformed ring
 
 	op := newOperation("")
@@ -434,6 +450,8 @@ func TestGeomOutRingMalformed(t *testing.T) {
 }
 
 func TestGeomOutRingExterior(t *testing.T) {
+	t.Parallel()
+
 	// exterior ring
 
 	op := newOperation("")
@@ -464,6 +482,8 @@ func TestGeomOutRingExterior(t *testing.T) {
 }
 
 func TestGeomOutRingInteriorReverse(t *testing.T) {
+	t.Parallel()
+
 	// interior ring points reversed
 
 	op := newOperation("")
@@ -494,6 +514,8 @@ func TestGeomOutRingInteriorReverse(t *testing.T) {
 }
 
 func TestGeomOutRingRemoveColinearPoints(t *testing.T) {
+	t.Parallel()
+
 	// removes colinear points successfully
 
 	op := newOperation("")
@@ -526,6 +548,8 @@ func TestGeomOutRingRemoveColinearPoints(t *testing.T) {
 }
 
 func TestGeomOutRingAlmostEqualPoint(t *testing.T) {
+	t.Parallel()
+
 	// almost equal point handled ok
 	// points harvested from https://github.com/mfogel/polygon-clipping/issues/37
 
@@ -564,6 +588,8 @@ func TestGeomOutRingAlmostEqualPoint(t *testing.T) {
 }
 
 func TestGeomOutRingWithColinearPoints(t *testing.T) {
+	t.Parallel()
+
 	// ring with all colinear points returns null
 
 	op := newOperation("")
@@ -597,6 +623,8 @@ func TestGeomOutRingWithColinearPoints(t *testing.T) {
 
 // poly
 func TestGeomOutPolyBasic(t *testing.T) {
+	t.Parallel()
+
 	// basic
 
 	ring1 := &ringOut{
@@ -625,6 +653,8 @@ func TestGeomOutPolyBasic(t *testing.T) {
 }
 
 func TestGeomOutPolyColinearExteriorRing(t *testing.T) {
+	t.Parallel()
+
 	// has all colinear exterior ring
 
 	ring1 := &ringOut{
@@ -638,6 +668,8 @@ func TestGeomOutPolyColinearExteriorRing(t *testing.T) {
 }
 
 func TestGeomOutPolyColinearInteriorRing(t *testing.T) {
+	t.Parallel()
+
 	// has all colinear interior ring
 
 	ring1 := &ringOut{
@@ -665,6 +697,8 @@ func TestGeomOutPolyColinearInteriorRing(t *testing.T) {
 }
 
 func TestGeomOutMultiPolyBasic(t *testing.T) {
+	t.Parallel()
+
 	// basic
 
 	multiPoly := newMultiPolyOut([]*ringOut{})
@@ -682,6 +716,8 @@ func TestGeomOutMultiPolyBasic(t *testing.T) {
 }
 
 func TestGeomOutMultiPolyColinearExteriorRing(t *testing.T) {
+	t.Parallel()
+
 	// has poly with all colinear exterior ring
 
 	multiPoly := newMultiPolyOut([]*ringOut{})

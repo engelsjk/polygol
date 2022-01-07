@@ -5,6 +5,8 @@ import (
 )
 
 func TestsweepEventCompare(t *testing.T) {
+	t.Parallel()
+
 	var se1, se2, se3 *sweepEvent
 	var seg1, seg2 *segment
 	var err error
@@ -112,6 +114,8 @@ func TestsweepEventCompare(t *testing.T) {
 }
 
 func TestnewSweepEvent(t *testing.T) {
+	t.Parallel()
+
 	var se1, se2 *sweepEvent
 	var p1 *point
 
@@ -124,6 +128,8 @@ func TestnewSweepEvent(t *testing.T) {
 }
 
 func TestSweepEventLink(t *testing.T) {
+	t.Parallel()
+
 	var se1, se2, se3, se4 *sweepEvent
 	var p1, p2 *point
 	var err error
@@ -186,6 +192,8 @@ func TestSweepEventLink(t *testing.T) {
 }
 
 func TestSweepEventgetLeftMostComparator(t *testing.T) {
+	t.Parallel()
+
 	var prevEvent, event *sweepEvent
 	var comparator func(a, b *sweepEvent) int
 	var se1, se2, se3, se4, se5 *sweepEvent

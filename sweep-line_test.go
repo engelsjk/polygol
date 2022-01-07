@@ -15,6 +15,7 @@ var comparator = func(a, b interface{}) int {
 }
 
 func TestSweepLine(t *testing.T) {
+	t.Parallel()
 
 	// test filling up the tree then emptying it out
 	sl := newSweepLine(nil, comparator)

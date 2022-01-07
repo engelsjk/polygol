@@ -41,6 +41,7 @@ func equalVector(v1, v2 []float64) bool {
 }
 
 func TestSegmentNew(t *testing.T) {
+	t.Parallel()
 
 	var leftSE, rightSE *sweepEvent
 
@@ -72,6 +73,8 @@ func TestSegmentNew(t *testing.T) {
 }
 
 func TestSegmentNewFromRing(t *testing.T) {
+	t.Parallel()
+
 	var p1, p2 *point
 	var seg *segment
 	var err error
@@ -101,6 +104,8 @@ func TestSegmentNewFromRing(t *testing.T) {
 }
 
 func TestSegmentSplit(t *testing.T) {
+	t.Parallel()
+
 	var seg *segment
 	var pt *point
 	var evt, otherEvt *sweepEvent
@@ -200,6 +205,8 @@ func TestSegmentSplit(t *testing.T) {
 	expect(t, evt.segment == orgRightEvt.segment)
 }
 func TestSegmentSimplePropertiesBboxVector(t *testing.T) {
+	t.Parallel()
+
 	var seg *segment
 	var err error
 
@@ -227,6 +234,8 @@ func TestSegmentSimplePropertiesBboxVector(t *testing.T) {
 	expect(t, equalVector(seg.vector(), []float64{0, 2}))
 }
 func TestSegmentConsume(t *testing.T) {
+	t.Parallel()
+
 	var p1, p2 *point
 	var seg1, seg2 *segment
 	var err error
@@ -297,6 +306,7 @@ func TestSegmentConsume(t *testing.T) {
 	expect(t, seg5.consumedBy == seg1)
 }
 func TestSegmentIsAnEndpoint(t *testing.T) {
+	t.Parallel()
 
 	op := newOperation("")
 
@@ -313,6 +323,8 @@ func TestSegmentIsAnEndpoint(t *testing.T) {
 	expect(t, !seg.isAnEndpoint(&point{x: 0, y: 0}))
 }
 func TestSegmentComparisonWithPoint(t *testing.T) {
+	t.Parallel()
+
 	var seg *segment
 	var err error
 	var pt *point
@@ -490,6 +502,8 @@ func TestSegmentComparisonWithPoint(t *testing.T) {
 	})
 }
 func TestSegmentgetIntersections2(t *testing.T) {
+	t.Parallel()
+
 	var seg1, seg2, s3 *segment
 	var err error
 	var inter *point
@@ -829,6 +843,8 @@ func TestSegmentgetIntersections2(t *testing.T) {
 
 }
 func TestsegmentCompareSegments(t *testing.T) {
+	t.Parallel()
+
 	var seg1, seg2, seg3 *segment
 	var err error
 
