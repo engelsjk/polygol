@@ -99,7 +99,7 @@ func (o *operation) run(geom Geom, moreGeoms ...Geom) (Geom, error) {
 			if queue.Size() > polygolClippingMaxQueueSize {
 				// prevents an infinite loop, an otherwise common manifestation of bugs
 				return nil, fmt.Errorf(`Infinite loop when putting segment endpoints in a priority queue 
-				(queue size too big). Try increasing POLYGOL_MAX_QUEUE_SIZE.`)
+				(queue size too big). Try increasing POLYGOL_MAX_QUEUE_SIZE > %d.`, polygolClippingMaxQueueSize)
 			}
 		}
 	}
@@ -135,13 +135,13 @@ func (o *operation) run(geom Geom, moreGeoms ...Geom) (Geom, error) {
 		if queue.Size() > polygolClippingMaxQueueSize {
 			// prevents an infinite loop, an otherwise common manifestation of bugs
 			return nil, fmt.Errorf(`Infinite loop when passing sweep line over endspoints
-			(queue size too big). Try increasing POLYGOL_MAX_QUEUE_SIZE.`)
+			(queue size too big). Try increasing POLYGOL_MAX_QUEUE_SIZE > %d.`, polygolClippingMaxQueueSize)
 		}
 
 		if len(sweepLine.segments) > polygolClippingMaxSweepLineSegments {
 			// prevents an infinite loop, an otherwise common manifestation of bugs
 			return nil, fmt.Errorf(`Infinite loop when passing sweep line over endspoints
-			(too many sweep line segments). Try increasing POLYGOL_MAX_SWEEPLINE_SEGMENTS.`)
+			(too many sweep line segments). Try increasing POLYGOL_MAX_SWEEPLINE_SEGMENTS > %d.`, polygolClippingMaxSweepLineSegments)
 		}
 
 		newEvents, err := sweepLine.process(evt)
