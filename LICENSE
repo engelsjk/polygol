@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2022 Jon Engelsman jon@engelsjk.com
+Copyright (c) 2022 Jon Engelsman jon@engelsjk.com - covers this Go implementation and any differences from the original JS library
 Copyright (c) 2018 Mike Fogel mike@fogel.ca - covers everything not specially attributed to others below.
 Copyright (c) 2016 Alexander Milevski info@w8r.name - covers all portions originally part of github:w8r/martinez, from which this project was forked on Febuary 2, 2018.
 
